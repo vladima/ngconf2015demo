@@ -29,8 +29,8 @@
 
   <!-- loading es6-module-loader.js shims promises, so it has to come before zone.js -->
   <script src="/deps/traceur.js"></script>
+  <script src="/tsc/typescriptServices.js"></script>
   <script src="/deps/system.js"></script>
-
   <script src="/deps/zone.js"></script>
   <script src="/deps/long-stack-trace-zone.js"></script>
 
@@ -38,13 +38,228 @@
   <script src="/deps/firebase/firebase.js"></script>
 
   <script>
-    System.paths = {
-      '*':'/ng/*.js',
-      'di':'angular2/di',
-      'annotations':'annotations.js',
-      'todo': 'todo.js',
+      System.paths = {
+      'text': 'deps/text.js',
+      '*': '/ng/*.js',
+      '*.ts': '/*.ts',
+      'di': 'angular2/di',
+      'annotations': 'annotations.ts',
+      'todo': 'todo.ts',
       'firebase/AngularFire': 'deps/firebase/AngularFire.js'
     };
+    
+    var fileNames =
+        [
+'annotations.ts',
+'angular2/angular2.d.ts',
+'angular2/change_detection.d.ts',
+'angular2/core.d.ts',
+'angular2/di.d.ts',
+'angular2/directives.d.ts',
+'angular2/forms.d.ts',
+'angular2/globals.d.ts',
+'angular2/test_lib.d.ts',
+'angular2/e2e_test/perf_util.d.ts',
+'angular2/e2e_test/test_util.d.ts',
+'angular2/src/change_detection/abstract_change_detector.d.ts',
+'angular2/src/change_detection/array_changes.d.ts',
+'angular2/src/change_detection/change_detection_jit_generator.d.ts',
+'angular2/src/change_detection/change_detection_util.d.ts',
+'angular2/src/change_detection/coalesce.d.ts',
+'angular2/src/change_detection/dynamic_change_detector.d.ts',
+'angular2/src/change_detection/exceptions.d.ts',
+'angular2/src/change_detection/interfaces.d.ts',
+'angular2/src/change_detection/keyvalue_changes.d.ts',
+'angular2/src/change_detection/proto_change_detector.d.ts',
+'angular2/src/change_detection/parser/ast.d.ts',
+'angular2/src/change_detection/parser/context_with_variable_bindings.d.ts',
+'angular2/src/change_detection/parser/lexer.d.ts',
+'angular2/src/change_detection/parser/parser.d.ts',
+'angular2/src/core/application.d.ts',
+'angular2/src/core/annotations/annotations.d.ts',
+'angular2/src/core/annotations/events.d.ts',
+'angular2/src/core/annotations/template.d.ts',
+'angular2/src/core/annotations/visibility.d.ts',
+'angular2/src/core/compiler/binding_propagation_config.d.ts',
+'angular2/src/core/compiler/compiler.d.ts',
+'angular2/src/core/compiler/directive_metadata.d.ts',
+'angular2/src/core/compiler/directive_metadata_reader.d.ts',
+'angular2/src/core/compiler/element_binder.d.ts',
+'angular2/src/core/compiler/element_injector.d.ts',
+'angular2/src/core/compiler/interfaces.d.ts',
+'angular2/src/core/compiler/selector.d.ts',
+'angular2/src/core/compiler/shadow_dom_strategy.d.ts',
+'angular2/src/core/compiler/template_loader.d.ts',
+'angular2/src/core/compiler/template_resolver.d.ts',
+'angular2/src/core/compiler/view.d.ts',
+'angular2/src/core/compiler/view_container.d.ts',
+'angular2/src/core/compiler/view_pool.d.ts',
+'angular2/src/core/compiler/pipeline/compile_control.d.ts',
+'angular2/src/core/compiler/pipeline/compile_element.d.ts',
+'angular2/src/core/compiler/pipeline/compile_pipeline.d.ts',
+'angular2/src/core/compiler/pipeline/compile_step.d.ts',
+'angular2/src/core/compiler/pipeline/default_steps.d.ts',
+'angular2/src/core/compiler/pipeline/directive_parser.d.ts',
+'angular2/src/core/compiler/pipeline/element_binder_builder.d.ts',
+'angular2/src/core/compiler/pipeline/element_binding_marker.d.ts',
+'angular2/src/core/compiler/pipeline/property_binding_parser.d.ts',
+'angular2/src/core/compiler/pipeline/proto_element_injector_builder.d.ts',
+'angular2/src/core/compiler/pipeline/proto_view_builder.d.ts',
+'angular2/src/core/compiler/pipeline/shadow_dom_transformer.d.ts',
+'angular2/src/core/compiler/pipeline/text_interpolation_parser.d.ts',
+'angular2/src/core/compiler/pipeline/view_splitter.d.ts',
+'angular2/src/core/compiler/shadow_dom_emulation/content_tag.d.ts',
+'angular2/src/core/compiler/shadow_dom_emulation/light_dom.d.ts',
+'angular2/src/core/compiler/shadow_dom_emulation/shim_css.d.ts',
+'angular2/src/core/compiler/xhr/xhr.d.ts',
+'angular2/src/core/compiler/xhr/xhr_impl.d.ts',
+'angular2/src/core/dom/element.d.ts',
+'angular2/src/core/events/event_manager.d.ts',
+'angular2/src/core/events/hammer_common.d.ts',
+'angular2/src/core/events/hammer_gestures.d.ts',
+'angular2/src/core/life_cycle/life_cycle.d.ts',
+'angular2/src/core/zone/vm_turn_zone.d.ts',
+'angular2/src/di/annotations.d.ts',
+'angular2/src/di/binding.d.ts',
+'angular2/src/di/exceptions.d.ts',
+'angular2/src/di/injector.d.ts',
+'angular2/src/di/key.d.ts',
+'angular2/src/di/opaque_token.d.ts',
+'angular2/src/directives/foreach.d.ts',
+'angular2/src/directives/if.d.ts',
+'angular2/src/directives/non_bindable.d.ts',
+'angular2/src/directives/switch.d.ts',
+'angular2/src/facade/async.d.ts',
+'angular2/src/facade/collection.d.ts',
+'angular2/src/facade/dom.d.ts',
+'angular2/src/facade/lang.d.ts',
+'angular2/src/facade/math.d.ts',
+'angular2/src/forms/directives.d.ts',
+'angular2/src/forms/model.d.ts',
+'angular2/src/mock/xhr_mock.d.ts',
+'angular2/src/reflection/reflection.d.ts',
+'angular2/src/reflection/reflection_capabilities.d.ts',
+'angular2/src/reflection/reflector.d.ts',
+'angular2/src/reflection/types.d.ts',
+'angular2/src/test_lib/benchmark_util.d.ts',
+'angular2/src/test_lib/test_lib.d.ts',
+'angular2/src/test_lib/utils.d.ts',
+'angular2/test/change_detection/array_changes_spec.d.ts',
+'angular2/test/change_detection/change_detection_spec.d.ts',
+'angular2/test/change_detection/coalesce_spec.d.ts',
+'angular2/test/change_detection/iterable.d.ts',
+'angular2/test/change_detection/keyvalue_changes_spec.d.ts',
+'angular2/test/change_detection/util.d.ts',
+'angular2/test/change_detection/parser/context_with_variable_bindings_spec.d.ts',
+'angular2/test/change_detection/parser/lexer_spec.d.ts',
+'angular2/test/change_detection/parser/parser_spec.d.ts',
+'angular2/test/core/application_spec.d.ts',
+'angular2/test/core/annotations/annotations_spec.d.ts',
+'angular2/test/core/compiler/compiler_spec.d.ts',
+'angular2/test/core/compiler/directive_metadata_reader_spec.d.ts',
+'angular2/test/core/compiler/element_injector_spec.d.ts',
+'angular2/test/core/compiler/integration_spec.d.ts',
+'angular2/test/core/compiler/selector_spec.d.ts',
+'angular2/test/core/compiler/template_loader_spec.d.ts',
+'angular2/test/core/compiler/view_container_spec.d.ts',
+'angular2/test/core/compiler/view_pool_spec.d.ts',
+'angular2/test/core/compiler/view_spec.d.ts',
+'angular2/test/core/compiler/pipeline/directive_parser_spec.d.ts',
+'angular2/test/core/compiler/pipeline/element_binder_builder_spec.d.ts',
+'angular2/test/core/compiler/pipeline/element_binding_marker_spec.d.ts',
+'angular2/test/core/compiler/pipeline/pipeline_spec.d.ts',
+'angular2/test/core/compiler/pipeline/property_binding_parser_spec.d.ts',
+'angular2/test/core/compiler/pipeline/proto_element_injector_builder_spec.d.ts',
+'angular2/test/core/compiler/pipeline/proto_view_builder_spec.d.ts',
+'angular2/test/core/compiler/pipeline/shadow_dom_transformer_spec.d.ts',
+'angular2/test/core/compiler/pipeline/text_interpolation_parser_spec.d.ts',
+'angular2/test/core/compiler/pipeline/view_splitter_spec.d.ts',
+'angular2/test/core/compiler/shadow_dom/content_tag_spec.d.ts',
+'angular2/test/core/compiler/shadow_dom/light_dom_spec.d.ts',
+'angular2/test/core/compiler/shadow_dom/shadow_dom_emulation_integration_spec.d.ts',
+'angular2/test/core/compiler/shadow_dom/shim_css_spec.d.ts',
+'angular2/test/core/events/event_manager_spec.d.ts',
+'angular2/test/core/zone/vm_turn_zone_spec.d.ts',
+'angular2/test/di/async_spec.d.ts',
+'angular2/test/di/injector_spec.d.ts',
+'angular2/test/di/key_spec.d.ts',
+'angular2/test/directives/foreach_spec.d.ts',
+'angular2/test/directives/if_spec.d.ts',
+'angular2/test/directives/non_bindable_spec.d.ts',
+'angular2/test/directives/switch_spec.d.ts',
+'angular2/test/forms/integration_spec.d.ts',
+'angular2/test/forms/model_spec.d.ts',
+'angular2/test/mock/xhr_mock_spec.d.ts',
+'angular2/test/reflection/reflector_spec.d.ts',
+'angular2/test/test_lib/test_lib_spec.d.ts',
+'firebase/angularfire.d.ts',
+'firebase/firebase.d.ts',
+'hammerjs/hammerjs.d.ts',
+'jasmine/jasmine.d.ts',
+'selenium-webdriver/selenium-webdriver.d.ts',
+'sublimetext/typescript/tsserver/lib.d.ts',
+'sublimetext/typescript/tsserver/lib.es6.d.ts',
+'touch-events/touch-events.d.ts',
+'tsc/lib.d.ts',
+'tsc/lib.es6.d.ts',
+'zone/zone.d.ts'
+];
+
+    var compiledFiles = {};
+    function typescriptTranspile(load, dependencies) {
+        var inputName = load.name + '.ts';
+        var outputName = load.name + ".js";
+        if (compiledFiles[outputName]) {
+            return compiledFiles[outputName];
+        }
+        var options = this.typescriptOptions || {};
+        options.module = ts.ModuleKind.AMD;
+
+        var contents = load.source;
+        var sourceFile = ts.createSourceFile(inputName, contents, ts.ScriptTarget.ES5);
+        var compilerHost = {
+            getSourceFile: function (fileName, target) {
+                if (fileName === inputName) {
+                    return ts.createSourceFile(fileName, contents, target);
+                }
+                else if (dependencies[fileName.toLowerCase()]) {
+                    return ts.createSourceFile(fileName, dependencies[fileName.toLowerCase()], target)
+                }
+                else {
+                    return undefined;
+                }
+            },
+            writeFile: function (name, text) {
+                compiledFiles[name] = text;
+            },
+            getDefaultLibFileName: function () { return "tsc/lib.d.ts"; },
+            useCaseSensitiveFileNames: function () { return false; },
+            getCanonicalFileName: function (fileName) { return fileName; },
+            getCurrentDirectory: function () { return ""; },
+            getNewLine: function () { return "\n"; }
+        };
+
+        var program = ts.createProgram([inputName], options, compilerHost);
+        var emitResult = program.emit();
+
+        return compiledFiles[outputName];
+    }
+
+    var systemTranslate = System.translate;
+    System.translate = function (load) {
+        if (load.name.endsWith("!text") || !load.address.toLowerCase().endsWith(".ts")) {
+            return systemTranslate.call(System, load);
+        }
+
+        var promises = fileNames.map(function (f) { return System.import(f + "!text");})
+        // TODO: (vladima) dynamically determine\load dependencies
+        return Promise.all(promises).then(function (content) {
+            var dependencies = {};
+            fileNames.forEach(function (f, i) { dependencies[f.toLowerCase()] = content[i]});
+            return typescriptTranspile(load, dependencies);
+        });
+    }
+
     System.import('todo').then(function(module) {
       module.main();
     }, console.log.bind(console));
