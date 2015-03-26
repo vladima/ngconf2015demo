@@ -179,19 +179,19 @@ interface ObjectConstructor {
       * Prevents the modification of attributes of existing properties, and prevents the addition of new properties.
       * @param o Object on which to lock the attributes. 
       */
-    seal(o: any): any;
+    seal<T>(o: T): T;
 
     /**
       * Prevents the modification of existing property attributes and values, and prevents the addition of new properties.
       * @param o Object on which to lock the attributes.
       */
-    freeze(o: any): any;
+    freeze<T>(o: T): T;
 
     /**
       * Prevents the addition of new properties to an object.
       * @param o Object to make non-extensible. 
       */
-    preventExtensions(o: any): any;
+    preventExtensions<T>(o: T): T;
 
     /**
       * Returns true if existing property attributes cannot be modified in an object and new properties cannot be added to the object.
@@ -425,6 +425,9 @@ interface String {
       */
     substr(from: number, length?: number): string;
 
+    /** Returns the primitive value of the specified object. */
+    valueOf(): string;
+
     [index: number]: string;
 }
 
@@ -477,6 +480,9 @@ interface Number {
       * @param precision Number of significant digits. Must be in the range 1 - 21, inclusive.
       */
     toPrecision(precision?: number): string;
+
+    /** Returns the primitive value of the specified object. */
+    valueOf(): number;
 }
 
 interface NumberConstructor {
@@ -1174,73 +1180,11 @@ interface TypedPropertyDescriptor<T> {
     set?: (value: T) => void;
 }
 
-declare const enum DecoratorTargets {
-    module      = 0x00000001,
-    import      = 0x00000002,
-    class       = 0x00000004,
-    interface   = 0x00000008,
-    function    = 0x00000010,
-    enum        = 0x00000020,
-    enumMember  = 0x00000040,
-    constructor = 0x00000080,
-    property    = 0x00000100,
-    method      = 0x00000200,
-    accessor    = 0x00000400,
-    parameter   = 0x00000800,
-    variable    = 0x00001000,
-    all         = 0x00001fff,
-}
-
-interface DecoratorFunction { <TFunction extends Function>(target: TFunction): TFunction | void; }
-interface ParameterDecoratorFunction { (target: Function, parameterIndex: number): void; }
-interface MemberDecoratorFunction { <T>(target: Function | Object, propertyKey: string, descriptor: TypedPropertyDescriptor<T>): TypedPropertyDescriptor<T> | void; }
-
-/**
-  * Built-in decorator. Sets options for a function used as a decorator
-  */
-@decorator({ ambient: true, targets: DecoratorTargets.function })
-declare function decorator(options?: {
-    /**
-      * A value indicating whether the decorator is ambient (true) and should not be emitted to output.
-      */
-    ambient?: boolean;
-
-    /**
-      * The elements on which a decorator can be applied.
-      * @remarks Non-ambient decorators are only valid on `class`, `property`, `method`, `accessor`, and `parameter` targets.
-      */
-    targets?: DecoratorTargets;
-}): void;
-
-/**
-  * Built-in decorator. Emits the serialized type of the target in the argument position of the decorated parameter.
-  */
-@decorator({ ambient: true, targets: DecoratorTargets.parameter })
-declare function type(): void;
-
-/**
-  * Built-in decorator. Emits the serialized types of the parameters of the target in the argument position of the decorated parameter.
-  */
-@decorator({ ambient: true, targets: DecoratorTargets.parameter })
-declare function paramtypes(): void;
-
-/**
-  * Built-in decorator. Emits the serialized return type of the target in the argument position of the decorated parameter.
-  */
-@decorator({ ambient: true, targets: DecoratorTargets.parameter })
-declare function returntype(): void;
-
-/**
-  * Built-in decorator. Reports an error on any usage of the symbol.
-  */
-@decorator({ ambient: true, targets: DecoratorTargets.function | DecoratorTargets.class | DecoratorTargets.interface | DecoratorTargets.constructor | DecoratorTargets.property | DecoratorTargets.accessor | DecoratorTargets.method | DecoratorTargets.enum | DecoratorTargets.enumMember })
-declare function obsolete(message?: string): void;
-
-/**
-  * Built-in decorator. Indicates to the compiler that the call expression should be ignored (and replaced with `void 0` if applicable) unless a specified conditional compilation symbol is defined.
-  */
-@decorator({ ambient: true, targets: DecoratorTargets.class | DecoratorTargets.function | DecoratorTargets.method })
-declare function conditional(condition: string): void;declare type PropertyKey = string | number | symbol;
+declare type ClassDecorator = <TFunction extends Function>(target: TFunction) => TFunction | void;
+declare type PropertyDecorator = (target: Object, propertyKey: string | symbol) => void;
+declare type MethodDecorator = <T>(target: Object, propertyKey: string | symbol, descriptor: TypedPropertyDescriptor<T>) => TypedPropertyDescriptor<T> | void;
+declare type ParameterDecorator = (target: Function, propertyKey: string | symbol, parameterIndex: number) => void;
+declare type PropertyKey = string | number | symbol;
 
 interface Symbol {
     /** Returns a string representation of an object. */
@@ -4755,27 +4699,27 @@ interface ProxyHandler<T> {
 
 interface ProxyConstructor {
     revocable<T>(target: T, handler: ProxyHandler<T>): { proxy: T; revoke: () => void; };
-    new <T>(target: T, handeler: ProxyHandler<T>): T
+    new <T>(target: T, handler: ProxyHandler<T>): T
 }
 declare var Proxy: ProxyConstructor;
 
-declare var Reflect: {
-    apply(target: Function, thisArgument: any, argumentsList: ArrayLike<any>): any;
-    construct(target: Function, argumentsList: ArrayLike<any>): any;
-    defineProperty(target: any, propertyKey: PropertyKey, attributes: PropertyDescriptor): boolean;
-    deleteProperty(target: any, propertyKey: PropertyKey): boolean;
-    enumerate(target: any): IterableIterator<any>;
-    get(target: any, propertyKey: PropertyKey, receiver?: any): any;
-    getOwnPropertyDescriptor(target: any, propertyKey: PropertyKey): PropertyDescriptor;
-    getPrototypeOf(target: any): any;
-    has(target: any, propertyKey: string): boolean;
-    has(target: any, propertyKey: symbol): boolean;
-    isExtensible(target: any): boolean;
-    ownKeys(target: any): Array<PropertyKey>;
-    preventExtensions(target: any): boolean;
-    set(target: any, propertyKey: PropertyKey, value: any, receiver? :any): boolean;
-    setPrototypeOf(target: any, proto: any): boolean;
-};
+declare module Reflect {
+    function apply(target: Function, thisArgument: any, argumentsList: ArrayLike<any>): any;
+    function construct(target: Function, argumentsList: ArrayLike<any>): any;
+    function defineProperty(target: any, propertyKey: PropertyKey, attributes: PropertyDescriptor): boolean;
+    function deleteProperty(target: any, propertyKey: PropertyKey): boolean;
+    function enumerate(target: any): IterableIterator<any>;
+    function get(target: any, propertyKey: PropertyKey, receiver?: any): any;
+    function getOwnPropertyDescriptor(target: any, propertyKey: PropertyKey): PropertyDescriptor;
+    function getPrototypeOf(target: any): any;
+    function has(target: any, propertyKey: string): boolean;
+    function has(target: any, propertyKey: symbol): boolean;
+    function isExtensible(target: any): boolean;
+    function ownKeys(target: any): Array<PropertyKey>;
+    function preventExtensions(target: any): boolean;
+    function set(target: any, propertyKey: PropertyKey, value: any, receiver? :any): boolean;
+    function setPrototypeOf(target: any, proto: any): boolean;
+}
 
 /**
  * Represents the completion of an asynchronous operation

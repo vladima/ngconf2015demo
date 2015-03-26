@@ -27,6 +27,7 @@
 <body>
   <todo-app>Loading...</todo-app>
   
+  <script src="/deps/reflect.js"></script>
   <!-- loading es6-module-loader.js shims promises, so it has to come before zone.js -->
   <script src="/deps/traceur.js"></script>
   <script src="/deps/system.js"></script>
@@ -47,7 +48,7 @@
       'di':'angular2/di',
       'annotations':'annotations.ts',
       'todo': 'todo.ts',
-      'firebase/angularfire': 'deps/firebase/angularfire.js'
+      'firebase/angularfire': 'deps/firebase/angularfire.ts'
     };
     System.import('todo').then(function(module) {
       module.main();

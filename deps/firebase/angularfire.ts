@@ -1,4 +1,6 @@
+import {Component, Template} from 'annotations';
 
+@Component()
 export class AngularFire {
   ref: Firebase;
   constructor(ref: Firebase) {

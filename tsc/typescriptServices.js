@@ -11232,6 +11232,15 @@ var ts;
         function getSignaturesOfType(type, kind) {
             return getSignaturesOfObjectOrUnionType(getApparentType(type), kind);
         }
+        function typeHasCallOrConstructSignatures(type) {
+            var apparentType = getApparentType(type);
+            if (apparentType.flags & (48128 | 16384)) {
+                var resolved = resolveObjectOrUnionTypeMembers(type);
+                return resolved.callSignatures.length > 0
+                    || resolved.constructSignatures.length > 0;
+            }
+            return false;
+        }
         function getIndexTypeOfObjectOrUnionType(type, kind) {
             if (type.flags & (48128 | 16384)) {
                 var resolved = resolveObjectOrUnionTypeMembers(type);
@@ -15405,7 +15414,10 @@ var ts;
         function checkTypeReference(node) {
             checkGrammarTypeArguments(node, node.typeArguments);
             var type = getTypeFromTypeReferenceNode(node);
-            if (type !== unknownType && node.typeArguments) {
+            if (type === unknownType && node.typeName.kind === 65 && compilerOptions.separateCompilation) {
+                getResolvedSymbol(node.typeName);
+            }
+            else if (type !== unknownType && node.typeArguments) {
                 var len = node.typeArguments.length;
                 for (var i = 0; i < len; i++) {
                     checkSourceElement(node.typeArguments[i]);
@@ -15722,22 +15734,54 @@ var ts;
                     break;
             }
         }
+        function checkTypeNodeAsExpression(node) {
+            if (node && node.kind === 141) {
+                var type = getTypeFromTypeNode(node);
+                if (!type || type.flags & (1048703 | 132 | 258)) {
+                    return;
+                }
+                if (type.symbol.valueDeclaration) {
+                    checkExpressionOrQualifiedName(node.typeName);
+                }
+            }
+        }
+        function checkTypeAnnotationAsExpression(node) {
+            switch (node.kind) {
+                case 132: return checkTypeNodeAsExpression(node.type);
+                case 129: return checkTypeNodeAsExpression(node.type);
+                case 134: return checkTypeNodeAsExpression(node.type);
+                case 136: return checkTypeNodeAsExpression(node.type);
+                case 137: return checkTypeNodeAsExpression(getSetAccessorTypeAnnotationNode(node));
+            }
+        }
+        function checkParameterTypeAnnotationsAsExpressions(node) {
+            if (node) {
+                ts.forEach(node.parameters, checkTypeAnnotationAsExpression);
+            }
+        }
         function checkDecorators(node) {
             if (!node.decorators) {
                 return;
             }
             switch (node.kind) {
                 case 198:
+                    var constructor = ts.getFirstConstructorWithBody(node);
+                    if (constructor) {
+                        checkParameterTypeAnnotationsAsExpressions(constructor);
+                    }
+                    break;
                 case 134:
-                case 136:
+                    checkParameterTypeAnnotationsAsExpressions(node);
                 case 137:
+                case 136:
                 case 132:
                 case 129:
-                    emitDecorate = true;
+                    checkTypeAnnotationAsExpression(node);
                     break;
                 default:
                     return;
             }
+            emitDecorate = true;
             ts.forEach(node.decorators, checkDecorator);
         }
         function checkFunctionDeclaration(node) {
@@ -17793,6 +17837,148 @@ var ts;
             }
             return undefined;
         }
+        function serializeEntityName(node, getGeneratedNameForNode, fallbackPath) {
+            if (node.kind === 65) {
+                var substitution = getExpressionNameSubstitution(node, getGeneratedNameForNode);
+                var text = substitution || node.text;
+                if (fallbackPath) {
+                    fallbackPath.push(text);
+                }
+                else {
+                    return text;
+                }
+            }
+            else {
+                var left = serializeEntityName(node.left, getGeneratedNameForNode, fallbackPath);
+                var right = serializeEntityName(node.right, getGeneratedNameForNode, fallbackPath);
+                if (!fallbackPath) {
+                    return left + "." + right;
+                }
+            }
+        }
+        function serializeTypeReferenceNode(node, getGeneratedNameForNode) {
+            var type = getTypeFromTypeReferenceNode(node);
+            if (type.flags & 16) {
+                return "void 0";
+            }
+            else if (type.flags & 8) {
+                return "Boolean";
+            }
+            else if (type.flags & 132) {
+                return "Number";
+            }
+            else if (type.flags & 258) {
+                return "String";
+            }
+            else if (type.flags & 8192) {
+                return "Array";
+            }
+            else if (type.flags & 1048576) {
+                return "Symbol";
+            }
+            else if (type === unknownType) {
+                var fallbackPath = [];
+                serializeEntityName(node.typeName, getGeneratedNameForNode, fallbackPath);
+                return fallbackPath;
+            }
+            else if (type.symbol && type.symbol.valueDeclaration) {
+                return serializeEntityName(node.typeName, getGeneratedNameForNode);
+            }
+            else if (typeHasCallOrConstructSignatures(type)) {
+                return "Function";
+            }
+            return "Object";
+        }
+        function serializeTypeNode(node, getGeneratedNameForNode) {
+            if (node) {
+                switch (node.kind) {
+                    case 99:
+                        return "void 0";
+                    case 149:
+                        return serializeTypeNode(node.type, getGeneratedNameForNode);
+                    case 142:
+                    case 143:
+                        return "Function";
+                    case 146:
+                    case 147:
+                        return "Array";
+                    case 113:
+                        return "Boolean";
+                    case 121:
+                    case 8:
+                        return "String";
+                    case 119:
+                        return "Number";
+                    case 141:
+                        return serializeTypeReferenceNode(node, getGeneratedNameForNode);
+                    case 144:
+                    case 145:
+                    case 148:
+                    case 112:
+                    default:
+                        break;
+                }
+            }
+            return "Object";
+        }
+        function serializeTypeOfNode(node, getGeneratedNameForNode) {
+            switch (node.kind) {
+                case 198: return "Function";
+                case 132: return serializeTypeNode(node.type, getGeneratedNameForNode);
+                case 129: return serializeTypeNode(node.type, getGeneratedNameForNode);
+                case 136: return serializeTypeNode(node.type, getGeneratedNameForNode);
+                case 137: return serializeTypeNode(getSetAccessorTypeAnnotationNode(node), getGeneratedNameForNode);
+            }
+            if (ts.isFunctionLike(node)) {
+                return "Function";
+            }
+            return "void 0";
+        }
+        function serializeParameterTypesOfNode(node, getGeneratedNameForNode) {
+            if (node) {
+                var valueDeclaration;
+                if (node.kind === 198) {
+                    valueDeclaration = ts.getFirstConstructorWithBody(node);
+                }
+                else if (ts.isFunctionLike(node) && ts.nodeIsPresent(node.body)) {
+                    valueDeclaration = node;
+                }
+                if (valueDeclaration) {
+                    var result;
+                    var parameters = valueDeclaration.parameters;
+                    var parameterCount = parameters.length;
+                    if (parameterCount > 0) {
+                        result = new Array(parameterCount);
+                        for (var i = 0; i < parameterCount; i++) {
+                            if (parameters[i].dotDotDotToken) {
+                                var parameterType = parameters[i].type;
+                                if (parameterType.kind === 146) {
+                                    parameterType = parameterType.elementType;
+                                }
+                                else if (parameterType.kind === 141 && parameterType.typeArguments && parameterType.typeArguments.length === 1) {
+                                    parameterType = parameterType.typeArguments[0];
+                                }
+                                else {
+                                    parameterType = undefined;
+                                }
+                                result[i] = serializeTypeNode(parameterType, getGeneratedNameForNode);
+                            }
+                            else {
+                                result[i] = serializeTypeOfNode(parameters[i], getGeneratedNameForNode);
+                            }
+                        }
+                        return result;
+                    }
+                }
+            }
+            return emptyArray;
+        }
+        function serializeReturnTypeOfNode(node, getGeneratedNameForNode) {
+            if (node && ts.isFunctionLike(node)) {
+                return serializeTypeNode(node.type, getGeneratedNameForNode);
+            }
+            return "void 0";
+        }
         function writeTypeOfDeclaration(declaration, enclosingDeclaration, flags, writer) {
             var symbol = getSymbolOfNode(declaration);
             var type = symbol && !(symbol.flags & (2048 | 131072))
@@ -17859,7 +18045,10 @@ var ts;
                 getConstantValue: getConstantValue,
                 resolvesToSomeValue: resolvesToSomeValue,
                 collectLinkedAliases: collectLinkedAliases,
-                getBlockScopedVariableId: getBlockScopedVariableId
+                getBlockScopedVariableId: getBlockScopedVariableId,
+                serializeTypeOfNode: serializeTypeOfNode,
+                serializeParameterTypesOfNode: serializeParameterTypesOfNode,
+                serializeReturnTypeOfNode: serializeReturnTypeOfNode
             };
         }
         function initializeTypeChecker() {
@@ -22886,7 +23075,7 @@ var ts;
                 emitStart(node);
                 emitDeclarationName(node);
                 write(" = ");
-                emitDecorateStart(node.decorators);
+                emitDecorateStart(node);
                 emitDeclarationName(node);
                 write(");");
                 emitEnd(node);
@@ -22937,7 +23126,7 @@ var ts;
                         emitEnd(member.name);
                         write(", ");
                     }
-                    emitDecorateStart(decorators);
+                    emitDecorateStart(member);
                     emitStart(member.name);
                     emitClassMemberPrefix(node, member);
                     write(", ");
@@ -22964,7 +23153,7 @@ var ts;
                     }
                     writeLine();
                     emitStart(parameter);
-                    emitDecorateStart(parameter.decorators);
+                    emitDecorateStart(parameter);
                     emitStart(parameter.name);
                     if (member.kind === 135) {
                         emitDeclarationName(node);
@@ -22983,8 +23172,9 @@ var ts;
                     writeLine();
                 });
             }
-            function emitDecorateStart(decorators) {
+            function emitDecorateStart(node) {
                 write("__decorate([");
+                var decorators = node.decorators;
                 var decoratorCount = decorators.length;
                 for (var i = 0; i < decoratorCount; i++) {
                     if (i > 0) {
@@ -22995,7 +23185,88 @@ var ts;
                     emit(decorator.expression);
                     emitEnd(decorator);
                 }
+                emitSerializedTypeMetadata(node);
                 write("], ");
+            }
+            function serializeTypeNameSegment(location, path, index) {
+                switch (index) {
+                    case 0:
+                        return "typeof " + path[index] + " !== 'undefined' && " + path[index];
+                    case 1:
+                        return serializeTypeNameSegment(location, path, index - 1) + "." + path[index];
+                    default:
+                        var temp = createTempVariable(location);
+                        recordTempDeclaration(temp);
+                        return "(" + temp.text + " = " + serializeTypeNameSegment(location, path, index - 1) + ") && " + temp.text + "." + path[index];
+                }
+            }
+            function shouldEmitTypeMetadata(node) {
+                switch (node.kind) {
+                    case 134:
+                    case 136:
+                    case 137:
+                    case 132:
+                    case 129:
+                        return true;
+                }
+                return false;
+            }
+            function shouldEmitReturnTypeMetadata(node) {
+                switch (node.kind) {
+                    case 134:
+                        return true;
+                }
+                return false;
+            }
+            function shouldEmitParamTypesMetadata(node) {
+                switch (node.kind) {
+                    case 198:
+                    case 134:
+                    case 137:
+                        return true;
+                }
+                return false;
+            }
+            function emitSerializedTypeMetadata(node) {
+                if (shouldEmitTypeMetadata(node)) {
+                    var serializedType = resolver.serializeTypeOfNode(node, getGeneratedNameForNode);
+                    if (serializedType) {
+                        write(", __metadata('design:type', ");
+                        emitSerializedType(node, serializedType);
+                        write(")");
+                    }
+                }
+                if (shouldEmitParamTypesMetadata(node)) {
+                    var serializedTypes = resolver.serializeParameterTypesOfNode(node, getGeneratedNameForNode);
+                    if (serializedTypes) {
+                        write(", __metadata('design:paramtypes', [");
+                        for (var i = 0; i < serializedTypes.length; ++i) {
+                            if (i > 0) {
+                                write(", ");
+                            }
+                            emitSerializedType(node, serializedTypes[i]);
+                        }
+                        write("])");
+                    }
+                }
+                if (shouldEmitReturnTypeMetadata(node)) {
+                    var serializedType = resolver.serializeReturnTypeOfNode(node, getGeneratedNameForNode);
+                    if (serializedType) {
+                        write(", __metadata('design:returntype', ");
+                        emitSerializedType(node, serializedType);
+                        write(")");
+                    }
+                }
+            }
+            function emitSerializedType(location, name) {
+                if (typeof name === "string") {
+                    write(name);
+                    return;
+                }
+                else {
+                    ts.Debug.assert(name.length > 0, "Invalid type name path for serialization");
+                    write("(" + serializeTypeNameSegment(location, name, name.length - 1) + ") || Object");
+                }
             }
             function emitInterfaceDeclaration(node) {
                 emitOnlyPinnedOrTripleSlashComments(node);
@@ -23606,7 +23877,7 @@ var ts;
                     extendsEmitted = true;
                 }
                 if (!decorateEmitted && resolver.getNodeCheckFlags(node) & 512) {
-                    writeHelper("\nvar __decorate = this.__decorate || function (decorators, target, key, value) {\n    var kind = typeof (arguments.length == 2 ? value = target : value);\n    for (var i = decorators.length - 1; i >= 0; --i) {\n        var decorator = decorators[i];\n        switch (kind) {\n            case \"function\": value = decorator(value) || value; break;\n            case \"number\": decorator(target, key, value); break;\n            case \"undefined\": decorator(target, key); break;\n            case \"object\": value = decorator(target, key, value) || value; break;\n        }\n    }\n    return value;\n};");
+                    writeHelper("\nvar __decorate = this.__decorate || function (decorators, target, key, value) {\n    var kind = typeof (arguments.length == 2 ? value = target : value);\n    for (var i = decorators.length - 1; i >= 0; --i) {\n        var decorator = decorators[i];\n        switch (kind) {\n            case \"function\": value = decorator(value) || value; break;\n            case \"number\": decorator(target, key, value); break;\n            case \"undefined\": decorator(target, key); break;\n            case \"object\": value = decorator(target, key, value) || value; break;\n        }\n    }\n    return value;\n};\nvar __metadata = this.__metadata || (typeof Reflect === \"object\" && Reflect.metadata) || function () { return function() { } };");
                     decorateEmitted = true;
                 }
                 if (ts.isExternalModule(node)) {
@@ -24560,10 +24831,6 @@ var ts;
             shortName: "w",
             type: "boolean",
             description: ts.Diagnostics.Watch_input_files
-        },
-        {
-            name: "separateCompilation",
-            type: "boolean"
         }
     ];
     function parseCommandLine(commandLine) {
@@ -29907,6 +30174,42 @@ var ts;
         sourceFile.version = version;
         sourceFile.scriptSnapshot = scriptSnapshot;
     }
+    function transpile(input, compilerOptions, fileName, syntaxErrors) {
+        var options = compilerOptions ? ts.clone(compilerOptions) : getDefaultCompilerOptions();
+        if (options.target !== 2 && (!options.module || options.module === 0)) {
+        }
+        options.preserveConstEnums = true;
+        options.declaration = false;
+        options.allowNonTsExtensions = true;
+        options.separateCompilation = true;
+        options.noEmitOnError = false;
+        options.noResolve = true;
+        var inputFileName = fileName || "module.ts";
+        var sourceFile = ts.createSourceFile(inputFileName, input, options.target);
+        if (syntaxErrors && sourceFile.parseDiagnostics) {
+            syntaxErrors.push.apply(syntaxErrors, sourceFile.parseDiagnostics);
+        }
+        var outputText;
+        var compilerHost = {
+            getSourceFile: function (fileName, target) { return fileName === inputFileName ? sourceFile : undefined; },
+            writeFile: function (name, text, writeByteOrderMark) {
+                if (ts.fileExtensionIs(name, ".js")) {
+                    ts.Debug.assert(outputText === undefined, "Unexpected multiple outputs for the file: " + name);
+                    outputText = text;
+                }
+            },
+            getDefaultLibFileName: function () { return "lib.d.ts"; },
+            useCaseSensitiveFileNames: function () { return false; },
+            getCanonicalFileName: function (fileName) { return fileName; },
+            getCurrentDirectory: function () { return ""; },
+            getNewLine: function () { return "\r\n"; }
+        };
+        var program = ts.createProgram([inputFileName], options, compilerHost);
+        program.emit();
+        ts.Debug.assert(outputText !== undefined, "Output generation failed");
+        return outputText;
+    }
+    ts.transpile = transpile;
     function createLanguageServiceSourceFile(fileName, scriptSnapshot, scriptTarget, version, setNodeParents) {
         var sourceFile = ts.createSourceFile(fileName, scriptSnapshot.getText(0, scriptSnapshot.getLength()), scriptTarget, setNodeParents);
         setSourceFileFields(sourceFile, scriptSnapshot, version);
@@ -30340,42 +30643,6 @@ var ts;
         return ScriptElementKind.unknown;
     }
     ts.getNodeKind = getNodeKind;
-    function transpile(input, compilerOptions, fileName, syntaxErrors) {
-        var options = compilerOptions ? ts.clone(compilerOptions) : getDefaultCompilerOptions();
-        if (options.target !== 2 && (!options.module || options.module === 0)) {
-        }
-        options.preserveConstEnums = true;
-        options.declaration = false;
-        options.allowNonTsExtensions = true;
-        options.separateCompilation = true;
-        options.noEmitOnError = false;
-        options.noResolve = true;
-        var inputFileName = fileName || "module.ts";
-        var sourceFile = ts.createSourceFile(inputFileName, input, options.target);
-        if (syntaxErrors && sourceFile.parseDiagnostics) {
-            syntaxErrors.push.apply(syntaxErrors, sourceFile.parseDiagnostics);
-        }
-        var outputText;
-        var compilerHost = {
-            getSourceFile: function (fileName, target) { return fileName === inputFileName ? sourceFile : undefined; },
-            writeFile: function (name, text, writeByteOrderMark) {
-                if (ts.fileExtensionIs(name, ".js")) {
-                    ts.Debug.assert(outputText === undefined, "Unexpected multiple outputs for the file: " + name);
-                    outputText = text;
-                }
-            },
-            getDefaultLibFileName: function () { return "lib.d.ts"; },
-            useCaseSensitiveFileNames: function () { return false; },
-            getCanonicalFileName: function (fileName) { return fileName; },
-            getCurrentDirectory: function () { return ""; },
-            getNewLine: function () { return "\r\n"; }
-        };
-        var program = ts.createProgram([inputFileName], options, compilerHost);
-        program.emit();
-        ts.Debug.assert(outputText !== undefined, "Output generation failed");
-        return outputText;
-    }
-    ts.transpile = transpile;
     function createLanguageService(host, documentRegistry) {
         if (documentRegistry === void 0) { documentRegistry = createDocumentRegistry(); }
         var syntaxTreeCache = new SyntaxTreeCache(host);
@@ -34364,4 +34631,4 @@ var TypeScript;
     })(Services = TypeScript.Services || (TypeScript.Services = {}));
 })(TypeScript || (TypeScript = {}));
 var toolsVersion = "1.4";
-//# sourceMappingURL=file:///C:/Sources/TS/TypeScript/built/local/typescriptServices.js.map
+//# sourceMappingURL=file:///C:/Sources/TS/__clean/TypeScript/built/local/typescriptServices.js.map
