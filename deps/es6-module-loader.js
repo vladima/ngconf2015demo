@@ -1,8 +1,2896 @@
-/*
- *  es6-module-loader v0.15.0
- *  https://github.com/ModuleLoader/es6-module-loader
- *  Copyright (c) 2015 Guy Bedford, Luke Hoban, Addy Osmani; Licensed MIT
- */
+!function(e){"object"==typeof exports?module.exports=e():"function"==typeof define&&define.amd?define(e):"undefined"!=typeof window?window.Promise=e():"undefined"!=typeof global?global.Promise=e():"undefined"!=typeof self&&(self.Promise=e())}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+/** @license MIT License (c) copyright 2010-2014 original author or authors */
+/** @author Brian Cavalier */
+/** @author John Hann */
 
-!function(a){"object"==typeof exports?module.exports=a():"function"==typeof define&&define.amd?define(a):"undefined"!=typeof window?window.Promise=a():"undefined"!=typeof global?global.Promise=a():"undefined"!=typeof self&&(self.Promise=a())}(function(){var a;return function b(a,c,d){function e(g,h){if(!c[g]){if(!a[g]){var i="function"==typeof require&&require;if(!h&&i)return i(g,!0);if(f)return f(g,!0);throw new Error("Cannot find module '"+g+"'")}var j=c[g]={exports:{}};a[g][0].call(j.exports,function(b){var c=a[g][1][b];return e(c?c:b)},j,j.exports,b,a,c,d)}return c[g].exports}for(var f="function"==typeof require&&require,g=0;g<d.length;g++)e(d[g]);return e}({1:[function(a,b){var c=a("../lib/decorators/unhandledRejection"),d=c(a("../lib/Promise"));b.exports="undefined"!=typeof global?global.Promise=d:"undefined"!=typeof self?self.Promise=d:d},{"../lib/Promise":2,"../lib/decorators/unhandledRejection":4}],2:[function(b,c){!function(a){"use strict";a(function(a){var b=a("./makePromise"),c=a("./Scheduler"),d=a("./env").asap;return b({scheduler:new c(d)})})}("function"==typeof a&&a.amd?a:function(a){c.exports=a(b)})},{"./Scheduler":3,"./env":5,"./makePromise":7}],3:[function(b,c){!function(a){"use strict";a(function(){function a(a){this._async=a,this._running=!1,this._queue=this,this._queueLen=0,this._afterQueue={},this._afterQueueLen=0;var b=this;this.drain=function(){b._drain()}}return a.prototype.enqueue=function(a){this._queue[this._queueLen++]=a,this.run()},a.prototype.afterQueue=function(a){this._afterQueue[this._afterQueueLen++]=a,this.run()},a.prototype.run=function(){this._running||(this._running=!0,this._async(this.drain))},a.prototype._drain=function(){for(var a=0;a<this._queueLen;++a)this._queue[a].run(),this._queue[a]=void 0;for(this._queueLen=0,this._running=!1,a=0;a<this._afterQueueLen;++a)this._afterQueue[a].run(),this._afterQueue[a]=void 0;this._afterQueueLen=0},a})}("function"==typeof a&&a.amd?a:function(a){c.exports=a()})},{}],4:[function(b,c){!function(a){"use strict";a(function(a){function b(a){throw a}function c(){}var d=a("../env").setTimer,e=a("../format");return function(a){function f(a){a.handled||(n.push(a),k("Potentially unhandled rejection ["+a.id+"] "+e.formatError(a.value)))}function g(a){var b=n.indexOf(a);b>=0&&(n.splice(b,1),l("Handled previous rejection ["+a.id+"] "+e.formatObject(a.value)))}function h(a,b){m.push(a,b),null===o&&(o=d(i,0))}function i(){for(o=null;m.length>0;)m.shift()(m.shift())}var j,k=c,l=c;"undefined"!=typeof console&&(j=console,k="undefined"!=typeof j.error?function(a){j.error(a)}:function(a){j.log(a)},l="undefined"!=typeof j.info?function(a){j.info(a)}:function(a){j.log(a)}),a.onPotentiallyUnhandledRejection=function(a){h(f,a)},a.onPotentiallyUnhandledRejectionHandled=function(a){h(g,a)},a.onFatalRejection=function(a){h(b,a.value)};var m=[],n=[],o=null;return a}})}("function"==typeof a&&a.amd?a:function(a){c.exports=a(b)})},{"../env":5,"../format":6}],5:[function(b,c){!function(a){"use strict";a(function(a){function b(){return"undefined"!=typeof process&&null!==process&&"function"==typeof process.nextTick}function c(){return"function"==typeof MutationObserver&&MutationObserver||"function"==typeof WebKitMutationObserver&&WebKitMutationObserver}function d(a){function b(){var a=c;c=void 0,a()}var c,d=document.createTextNode(""),e=new a(b);e.observe(d,{characterData:!0});var f=0;return function(a){c=a,d.data=f^=1}}var e,f="undefined"!=typeof setTimeout&&setTimeout,g=function(a,b){return setTimeout(a,b)},h=function(a){return clearTimeout(a)},i=function(a){return f(a,0)};if(b())i=function(a){return process.nextTick(a)};else if(e=c())i=d(e);else if(!f){var j=a,k=j("vertx");g=function(a,b){return k.setTimer(b,a)},h=k.cancelTimer,i=k.runOnLoop||k.runOnContext}return{setTimer:g,clearTimer:h,asap:i}})}("function"==typeof a&&a.amd?a:function(a){c.exports=a(b)})},{}],6:[function(b,c){!function(a){"use strict";a(function(){function a(a){var c="object"==typeof a&&null!==a&&a.stack?a.stack:b(a);return a instanceof Error?c:c+" (WARNING: non-Error used)"}function b(a){var b=String(a);return"[object Object]"===b&&"undefined"!=typeof JSON&&(b=c(a,b)),b}function c(a,b){try{return JSON.stringify(a)}catch(c){return b}}return{formatError:a,formatObject:b,tryStringify:c}})}("function"==typeof a&&a.amd?a:function(a){c.exports=a()})},{}],7:[function(b,c){!function(a){"use strict";a(function(){return function(a){function b(a,b){this._handler=a===t?b:c(a)}function c(a){function b(a){e.resolve(a)}function c(a){e.reject(a)}function d(a){e.notify(a)}var e=new v;try{a(b,c,d)}catch(f){c(f)}return e}function d(a){return I(a)?a:new b(t,new w(q(a)))}function e(a){return new b(t,new w(new z(a)))}function f(){return _}function g(){return new b(t,new v)}function h(a,b){var c=new v(a.receiver,a.join().context);return new b(t,c)}function i(a){return k(S,null,a)}function j(a,b){return k(N,a,b)}function k(a,c,d){function e(b,e,g){g.resolved||l(d,f,b,a(c,e,b),g)}function f(a,b,c){k[a]=b,0===--j&&c.become(new y(k))}for(var g,h="function"==typeof c?e:f,i=new v,j=d.length>>>0,k=new Array(j),m=0;m<d.length&&!i.resolved;++m)g=d[m],void 0!==g||m in d?l(d,h,m,g,i):--j;return 0===j&&i.become(new y(k)),new b(t,i)}function l(a,b,c,d,e){if(J(d)){var f=r(d),g=f.state();0===g?f.fold(b,c,void 0,e):g>0?b(c,f.value,e):(e.become(f),m(a,c+1,f))}else b(c,d,e)}function m(a,b,c){for(var d=b;d<a.length;++d)n(q(a[d]),c)}function n(a,b){if(a!==b){var c=a.state();0===c?a.visit(a,void 0,a._unreport):0>c&&a._unreport()}}function o(a){return"object"!=typeof a||null===a?e(new TypeError("non-iterable passed to race()")):0===a.length?f():1===a.length?d(a[0]):p(a)}function p(a){var c,d,e,f=new v;for(c=0;c<a.length;++c)if(d=a[c],void 0!==d||c in a){if(e=q(d),0!==e.state()){f.become(e),m(a,c+1,e);break}e.visit(f,f.resolve,f.reject)}return new b(t,f)}function q(a){return I(a)?a._handler.join():J(a)?s(a):new y(a)}function r(a){return I(a)?a._handler.join():s(a)}function s(a){try{var b=a.then;return"function"==typeof b?new x(b,a):new y(a)}catch(c){return new z(c)}}function t(){}function u(){}function v(a,c){b.createContext(this,c),this.consumers=void 0,this.receiver=a,this.handler=void 0,this.resolved=!1}function w(a){this.handler=a}function x(a,b){v.call(this),V.enqueue(new F(a,b,this))}function y(a){b.createContext(this),this.value=a}function z(a){b.createContext(this),this.id=++Z,this.value=a,this.handled=!1,this.reported=!1,this._report()}function A(a,b){this.rejection=a,this.context=b}function B(a){this.rejection=a}function C(){return new z(new TypeError("Promise cycle"))}function D(a,b){this.continuation=a,this.handler=b}function E(a,b){this.handler=b,this.value=a}function F(a,b,c){this._then=a,this.thenable=b,this.resolver=c}function G(a,b,c,d,e){try{a.call(b,c,d,e)}catch(f){d(f)}}function H(a,b,c,d){this.f=a,this.z=b,this.c=c,this.to=d,this.resolver=Y,this.receiver=this}function I(a){return a instanceof b}function J(a){return("object"==typeof a||"function"==typeof a)&&null!==a}function K(a,c,d,e){return"function"!=typeof a?e.become(c):(b.enterContext(c),O(a,c.value,d,e),void b.exitContext())}function L(a,c,d,e,f){return"function"!=typeof a?f.become(d):(b.enterContext(d),P(a,c,d.value,e,f),void b.exitContext())}function M(a,c,d,e,f){return"function"!=typeof a?f.notify(c):(b.enterContext(d),Q(a,c,e,f),void b.exitContext())}function N(a,b,c){try{return a(b,c)}catch(d){return e(d)}}function O(a,b,c,d){try{d.become(q(a.call(c,b)))}catch(e){d.become(new z(e))}}function P(a,b,c,d,e){try{a.call(d,b,c,e)}catch(f){e.become(new z(f))}}function Q(a,b,c,d){try{d.notify(a.call(c,b))}catch(e){d.notify(e)}}function R(a,b){b.prototype=X(a.prototype),b.prototype.constructor=b}function S(a,b){return b}function T(){}function U(){return"undefined"!=typeof process&&null!==process&&"function"==typeof process.emit?function(a,b){return"unhandledRejection"===a?process.emit(a,b.value,b):process.emit(a,b)}:"undefined"!=typeof self&&"function"==typeof CustomEvent?function(a,b,c){var d=!1;try{var e=new c("unhandledRejection");d=e instanceof c}catch(f){}return d?function(a,d){var e=new c(a,{detail:{reason:d.value,key:d},bubbles:!1,cancelable:!0});return!b.dispatchEvent(e)}:a}(T,self,CustomEvent):T}var V=a.scheduler,W=U(),X=Object.create||function(a){function b(){}return b.prototype=a,new b};b.resolve=d,b.reject=e,b.never=f,b._defer=g,b._handler=q,b.prototype.then=function(a,b,c){var d=this._handler,e=d.join().state();if("function"!=typeof a&&e>0||"function"!=typeof b&&0>e)return new this.constructor(t,d);var f=this._beget(),g=f._handler;return d.chain(g,d.receiver,a,b,c),f},b.prototype["catch"]=function(a){return this.then(void 0,a)},b.prototype._beget=function(){return h(this._handler,this.constructor)},b.all=i,b.race=o,b._traverse=j,b._visitRemaining=m,t.prototype.when=t.prototype.become=t.prototype.notify=t.prototype.fail=t.prototype._unreport=t.prototype._report=T,t.prototype._state=0,t.prototype.state=function(){return this._state},t.prototype.join=function(){for(var a=this;void 0!==a.handler;)a=a.handler;return a},t.prototype.chain=function(a,b,c,d,e){this.when({resolver:a,receiver:b,fulfilled:c,rejected:d,progress:e})},t.prototype.visit=function(a,b,c,d){this.chain(Y,a,b,c,d)},t.prototype.fold=function(a,b,c,d){this.when(new H(a,b,c,d))},R(t,u),u.prototype.become=function(a){a.fail()};var Y=new u;R(t,v),v.prototype._state=0,v.prototype.resolve=function(a){this.become(q(a))},v.prototype.reject=function(a){this.resolved||this.become(new z(a))},v.prototype.join=function(){if(!this.resolved)return this;for(var a=this;void 0!==a.handler;)if(a=a.handler,a===this)return this.handler=C();return a},v.prototype.run=function(){var a=this.consumers,b=this.handler;this.handler=this.handler.join(),this.consumers=void 0;for(var c=0;c<a.length;++c)b.when(a[c])},v.prototype.become=function(a){this.resolved||(this.resolved=!0,this.handler=a,void 0!==this.consumers&&V.enqueue(this),void 0!==this.context&&a._report(this.context))},v.prototype.when=function(a){this.resolved?V.enqueue(new D(a,this.handler)):void 0===this.consumers?this.consumers=[a]:this.consumers.push(a)},v.prototype.notify=function(a){this.resolved||V.enqueue(new E(a,this))},v.prototype.fail=function(a){var b="undefined"==typeof a?this.context:a;this.resolved&&this.handler.join().fail(b)},v.prototype._report=function(a){this.resolved&&this.handler.join()._report(a)},v.prototype._unreport=function(){this.resolved&&this.handler.join()._unreport()},R(t,w),w.prototype.when=function(a){V.enqueue(new D(a,this))},w.prototype._report=function(a){this.join()._report(a)},w.prototype._unreport=function(){this.join()._unreport()},R(v,x),R(t,y),y.prototype._state=1,y.prototype.fold=function(a,b,c,d){L(a,b,this,c,d)},y.prototype.when=function(a){K(a.fulfilled,this,a.receiver,a.resolver)};var Z=0;R(t,z),z.prototype._state=-1,z.prototype.fold=function(a,b,c,d){d.become(this)},z.prototype.when=function(a){"function"==typeof a.rejected&&this._unreport(),K(a.rejected,this,a.receiver,a.resolver)},z.prototype._report=function(a){V.afterQueue(new A(this,a))},z.prototype._unreport=function(){this.handled||(this.handled=!0,V.afterQueue(new B(this)))},z.prototype.fail=function(a){this.reported=!0,W("unhandledRejection",this),b.onFatalRejection(this,void 0===a?this.context:a)},A.prototype.run=function(){this.rejection.handled||this.rejection.reported||(this.rejection.reported=!0,W("unhandledRejection",this.rejection)||b.onPotentiallyUnhandledRejection(this.rejection,this.context))},B.prototype.run=function(){this.rejection.reported&&(W("rejectionHandled",this.rejection)||b.onPotentiallyUnhandledRejectionHandled(this.rejection))},b.createContext=b.enterContext=b.exitContext=b.onPotentiallyUnhandledRejection=b.onPotentiallyUnhandledRejectionHandled=b.onFatalRejection=T;var $=new t,_=new b(t,$);return D.prototype.run=function(){this.handler.join().when(this.continuation)},E.prototype.run=function(){var a=this.handler.consumers;if(void 0!==a)for(var b,c=0;c<a.length;++c)b=a[c],M(b.progress,this.value,this.handler,b.receiver,b.resolver)},F.prototype.run=function(){function a(a){d.resolve(a)}function b(a){d.reject(a)}function c(a){d.notify(a)}var d=this.resolver;G(this._then,this.thenable,a,b,c)},H.prototype.fulfilled=function(a){this.f.call(this.c,this.z,a,this.to)},H.prototype.rejected=function(a){this.to.reject(a)},H.prototype.progress=function(a){this.to.notify(a)},b}})}("function"==typeof a&&a.amd?a:function(a){c.exports=a()})},{}]},{},[1])(1)}),function(__global){function __eval(__source,__global,load){var __curRegister=System.register;System.register=function(a,b,c){"string"!=typeof a&&(c=b,b=a),load.declare=c,load.depsList=b};try{eval('(function() { var __moduleName = "'+(load.name||"").replace('"','"')+'"; '+__source+" \n }).call(__global);")}catch(e){throw("SyntaxError"==e.name||"TypeError"==e.name)&&(e.message="Evaluating "+(load.name||load.address)+"\n	"+e.message),e}System.register=__curRegister}$__Object$getPrototypeOf=Object.getPrototypeOf||function(a){return a.__proto__};var $__Object$defineProperty;!function(){try{Object.defineProperty({},"a",{})&&($__Object$defineProperty=Object.defineProperty)}catch(a){$__Object$defineProperty=function(a,b,c){try{a[b]=c.value||c.get.call(a)}catch(d){}}}}(),$__Object$create=Object.create||function(a,b){function c(){}if(c.prototype=a,"object"==typeof b)for(prop in b)b.hasOwnProperty(prop)&&(c[prop]=b[prop]);return new c},function(){function a(a){return{status:"loading",name:a,linkSets:[],dependencies:[],metadata:{}}}function b(a,b,c){return new A(g({step:c.address?"fetch":"locate",loader:a,moduleName:b,moduleMetadata:c&&c.metadata||{},moduleSource:c.source,moduleAddress:c.address}))}function c(b,c,e,f){return new A(function(a){a(b.loaderObj.normalize(c,e,f))}).then(function(c){var e;if(b.modules[c])return e=a(c),e.status="linked",e.module=b.modules[c],e;for(var f=0,g=b.loads.length;g>f;f++)if(e=b.loads[f],e.name==c)return e;return e=a(c),b.loads.push(e),d(b,e),e})}function d(a,b){e(a,b,A.resolve().then(function(){return a.loaderObj.locate({name:b.name,metadata:b.metadata})}))}function e(a,b,c){f(a,b,c.then(function(c){return"loading"==b.status?(b.address=c,a.loaderObj.fetch({name:b.name,metadata:b.metadata,address:c})):void 0}))}function f(a,b,d){d.then(function(c){return"loading"==b.status?a.loaderObj.translate({name:b.name,metadata:b.metadata,address:b.address,source:c}):void 0}).then(function(c){return"loading"==b.status?(b.source=c,a.loaderObj.instantiate({name:b.name,metadata:b.metadata,address:b.address,source:c})):void 0}).then(function(d){if("loading"==b.status){if(void 0===d)b.address=b.address||"<Anonymous Module "+ ++D+">",b.isDeclarative=!0,__eval(a.loaderObj.transpile(b),__global,b);else{if("object"!=typeof d)throw TypeError("Invalid instantiate return value");b.depsList=d.deps||[],b.execute=d.execute,b.isDeclarative=!1}b.dependencies=[];for(var e=b.depsList,f=[],g=0,h=e.length;h>g;g++)(function(d,e){f.push(c(a,d,b.name,b.address).then(function(a){if(b.dependencies[e]={key:d,value:a.name},"linked"!=a.status)for(var c=b.linkSets.concat([]),f=0,g=c.length;g>f;f++)i(c[f],a)}))})(e[g],g);return A.all(f)}}).then(function(){b.status="loaded";for(var a=b.linkSets.concat([]),c=0,d=a.length;d>c;c++)k(a[c],b)})["catch"](function(a){b.status="failed",b.exception=a;for(var c=b.linkSets.concat([]),d=0,e=c.length;e>d;d++)l(c[d],b,a)})}function g(b){return function(c){var g=b.loader,i=b.moduleName,j=b.step;if(g.modules[i])throw new TypeError('"'+i+'" already exists in the module table');for(var k,l=0,m=g.loads.length;m>l;l++)if(g.loads[l].name==i)return k=g.loads[l],"translate"!=j||k.source||(k.address=b.moduleAddress,f(g,k,A.resolve(b.moduleSource))),k.linkSets[0].done.then(function(){c(k)});var n=a(i);n.metadata=b.moduleMetadata;var o=h(g,n);g.loads.push(n),c(o.done),"locate"==j?d(g,n):"fetch"==j?e(g,n,A.resolve(b.moduleAddress)):(n.address=b.moduleAddress,f(g,n,A.resolve(b.moduleSource)))}}function h(a,b){var c={loader:a,loads:[],startingLoad:b,loadingCount:0};return c.done=new A(function(a,b){c.resolve=a,c.reject=b}),i(c,b),c}function i(a,b){for(var c=0,d=a.loads.length;d>c;c++)if(a.loads[c]==b)return;a.loads.push(b),b.linkSets.push(a),"loaded"!=b.status&&a.loadingCount++;for(var e=a.loader,c=0,d=b.dependencies.length;d>c;c++){var f=b.dependencies[c].value;if(!e.modules[f])for(var g=0,h=e.loads.length;h>g;g++)if(e.loads[g].name==f){i(a,e.loads[g]);break}}}function j(a){var b=!1;try{p(a,function(c,d){l(a,c,d),b=!0})}catch(c){l(a,null,c),b=!0}return b}function k(a,b){if(a.loadingCount--,!(a.loadingCount>0)){var c=a.startingLoad;if(a.loader.loaderObj.execute===!1){for(var d=[].concat(a.loads),e=0,f=d.length;f>e;e++){var b=d[e];b.module=b.isDeclarative?{name:b.name,module:E({}),evaluated:!0}:{module:E({})},b.status="linked",m(a.loader,b)}return a.resolve(c)}var g=j(a);g||a.resolve(c)}}function l(a,b,c){var d=a.loader;a.loads[0].name!=b.name&&(c=w(c,'Error loading "'+b.name+'" from "'+a.loads[0].name+'" at '+(a.loads[0].address||"<unknown>")+"\n")),c=w(c,'Error loading "'+b.name+'" at '+(b.address||"<unknown>")+"\n");for(var e=a.loads.concat([]),f=0,g=e.length;g>f;f++){var b=e[f];d.loaderObj.failed=d.loaderObj.failed||[],-1==B.call(d.loaderObj.failed,b)&&d.loaderObj.failed.push(b);var h=B.call(b.linkSets,a);if(b.linkSets.splice(h,1),0==b.linkSets.length){var i=B.call(a.loader.loads,b);-1!=i&&a.loader.loads.splice(i,1)}}a.reject(c)}function m(a,b){if(a.loaderObj.trace){a.loaderObj.loads||(a.loaderObj.loads={});var c={};b.dependencies.forEach(function(a){c[a.key]=a.value}),a.loaderObj.loads[b.name]={name:b.name,deps:b.dependencies.map(function(a){return a.key}),depMap:c,address:b.address,metadata:b.metadata,source:b.source,kind:b.isDeclarative?"declarative":"dynamic"}}b.name&&(a.modules[b.name]=b.module);var d=B.call(a.loads,b);-1!=d&&a.loads.splice(d,1);for(var e=0,f=b.linkSets.length;f>e;e++)d=B.call(b.linkSets[e].loads,b),-1!=d&&b.linkSets[e].loads.splice(d,1);b.linkSets.splice(0,b.linkSets.length)}function n(a,b,c){if(c[a.groupIndex]=c[a.groupIndex]||[],-1==B.call(c[a.groupIndex],a)){c[a.groupIndex].push(a);for(var d=0,e=b.length;e>d;d++)for(var f=b[d],g=0;g<a.dependencies.length;g++)if(f.name==a.dependencies[g].value){var h=a.groupIndex+(f.isDeclarative!=a.isDeclarative);if(void 0===f.groupIndex||f.groupIndex<h){if(void 0!==f.groupIndex&&(c[f.groupIndex].splice(B.call(c[f.groupIndex],f),1),0==c[f.groupIndex].length))throw new TypeError("Mixed dependency cycle detected");f.groupIndex=h}n(f,b,c)}}}function o(a,b,c){try{var d=b.execute()}catch(e){return void c(b,e)}return d&&d instanceof y?d:void c(b,new TypeError("Execution must define a Module instance"))}function p(a,b){var c=a.loader;if(a.loads.length){var d=[],e=a.loads[0];e.groupIndex=0,n(e,a.loads,d);for(var f=e.isDeclarative==d.length%2,g=d.length-1;g>=0;g--){for(var h=d[g],i=0;i<h.length;i++){var j=h[i];if(f)r(j,a.loads,c);else{var k=o(a,j,b);if(!k)return;j.module={name:j.name,module:k},j.status="linked"}m(c,j)}f=!f}}}function q(a,b){var c=b.moduleRecords;return c[a]||(c[a]={name:a,dependencies:[],module:new y,importers:[]})}function r(a,b,c){if(!a.module){var d=a.module=q(a.name,c),e=a.module.module,f=a.declare.call(__global,function(a,b){d.locked=!0,e[a]=b;for(var c=0,f=d.importers.length;f>c;c++){var g=d.importers[c];if(!g.locked){var h=B.call(g.dependencies,d);g.setters[h](e)}}return d.locked=!1,b});d.setters=f.setters,d.execute=f.execute;for(var g=0,h=a.dependencies.length;h>g;g++){var i=a.dependencies[g].value,j=c.modules[i];if(!j)for(var k=0;k<b.length;k++)b[k].name==i&&(b[k].module?j=q(i,c):(r(b[k],b,c),j=b[k].module));j.importers?(d.dependencies.push(j),j.importers.push(d)):d.dependencies.push(null),d.setters[g]&&d.setters[g](j.module)}a.status="linked"}}function s(a,b){return u(b.module,[],a),b.module.module}function t(a){try{a.execute.call(__global)}catch(b){return b}}function u(a,b,c){var d=v(a,b,c);if(d)throw d}function v(a,b,c){if(!a.evaluated&&a.dependencies){b.push(a);for(var d,e=a.dependencies,f=0,g=e.length;g>f;f++){var h=e[f];if(h&&-1==B.call(b,h)&&(d=v(h,b,c)))return d=w(d,"Error evaluating "+h.name+"\n")}if(a.failed)return new Error("Module failed execution.");if(!a.evaluated)return a.evaluated=!0,d=t(a),d?a.failed=!0:Object.preventExtensions&&Object.preventExtensions(a.module),a.execute=void 0,d}}function w(a,b){return a instanceof Error?a.message=b+a.message:a=b+a,a}function x(a){if("object"!=typeof a)throw new TypeError("Options must be an object");a.normalize&&(this.normalize=a.normalize),a.locate&&(this.locate=a.locate),a.fetch&&(this.fetch=a.fetch),a.translate&&(this.translate=a.translate),a.instantiate&&(this.instantiate=a.instantiate),this._loader={loaderObj:this,loads:[],modules:{},importPromises:{},moduleRecords:{}},C(this,"global",{get:function(){return __global}})}function y(){}function z(a,b,c){var d=a._loader.importPromises;return d[b]=c.then(function(a){return d[b]=void 0,a},function(a){throw d[b]=void 0,a})}var A=__global.Promise||require("when/es6-shim/Promise");__global.console&&(console.assert=console.assert||function(){});var B=Array.prototype.indexOf||function(a){for(var b=0,c=this.length;c>b;b++)if(this[b]===a)return b;return-1},C=$__Object$defineProperty,D=0;x.prototype={constructor:x,define:function(a,b,c){if(this._loader.importPromises[a])throw new TypeError("Module is already loading.");return z(this,a,new A(g({step:"translate",loader:this._loader,moduleName:a,moduleMetadata:c&&c.metadata||{},moduleSource:b,moduleAddress:c&&c.address})))},"delete":function(a){var b=this._loader;return delete b.importPromises[a],delete b.moduleRecords[a],b.modules[a]?delete b.modules[a]:!1},get:function(a){return this._loader.modules[a]?(u(this._loader.modules[a],[],this),this._loader.modules[a].module):void 0},has:function(a){return!!this._loader.modules[a]},"import":function(a,c){var d=this;return A.resolve(d.normalize(a,c&&c.name,c&&c.address)).then(function(a){var e=d._loader;return e.modules[a]?(u(e.modules[a],[],e._loader),e.modules[a].module):e.importPromises[a]||z(d,a,b(e,a,c||{}).then(function(b){return delete e.importPromises[a],s(e,b)}))})},load:function(a){return this._loader.modules[a]?(u(this._loader.modules[a],[],this._loader),A.resolve(this._loader.modules[a].module)):this._loader.importPromises[a]||z(this,a,b(this._loader,a,{}))},module:function(b,c){var d=a();d.address=c&&c.address;var e=h(this._loader,d),g=A.resolve(b),i=this._loader,j=e.done.then(function(){return s(i,d)});return f(i,d,g),j},newModule:function(a){if("object"!=typeof a)throw new TypeError("Expected object");var b=new y;for(var c in a)!function(c){C(b,c,{configurable:!1,enumerable:!0,get:function(){return a[c]}})}(c);return Object.preventExtensions&&Object.preventExtensions(b),b},set:function(a,b){if(!(b instanceof y))throw new TypeError("Loader.set("+a+", module) must be a module");this._loader.modules[a]={module:b}},normalize:function(a){return a},locate:function(a){return a.name},fetch:function(){throw new TypeError("Fetch not implemented")},translate:function(a){return a.source},instantiate:function(){}};var E=x.prototype.newModule;"object"==typeof exports&&(module.exports=x),__global.Reflect=__global.Reflect||{},__global.Reflect.Loader=__global.Reflect.Loader||x,__global.Reflect.global=__global.Reflect.global||__global,__global.LoaderPolyfill=x}(),function(a){function b(a){var b=this.traceurOptions||{};b.modules="instantiate",b.script=!1,b.sourceMaps="inline",b.filename=a.address,b.inputSourceMap=a.metadata.sourceMap;var d=new h.Compiler(b),e=c(a.source,d,b.filename);return e+="!eval"}function c(a,b,c){try{return b.compile(a,c)}catch(d){throw d[0]}}function d(a){var b=this.babelOptions||{};b.modules="system",b.sourceMap="inline",b.filename=a.address,b.code=!0,b.ast=!1,b.blacklist=b.blacklist||[],b.blacklist.push("react");var c=h.transform(a.source,b).code;return c+"\n//# sourceURL="+a.address+"!eval"}function e(a,b){var c=a.slice(2);return System.register(c,function(a){for(var d={},e={},f=[d,e],g=[],h=0,i=c.length;i>h;h++)g.push(function(a){return function(b){f[2+a]=b}}(h));return{setters:g,execute:function(){b.apply(void 0,f);for(var c in e)a(c,e[c])}}})}function f(a){var b=h,c=this.typescriptOptions||{};c.module=b.ModuleKind.AMD;{var d=a.source,f="file1.ts",g="var define = "+e.toString()+"; ",i=(b.createSourceFile(f,d,b.ScriptTarget.ES5),{getSourceFile:function(a,c){return a===f?b.createSourceFile(a,d,c):void 0},writeFile:function(a,b){g+=b},getDefaultLibFileName:function(){return"lib.d.ts"},useCaseSensitiveFileNames:function(){return!1},getCanonicalFileName:function(a){return a},getCurrentDirectory:function(){return""},getNewLine:function(){return"\n"}}),j=b.createProgram([f],c,i);j.emit()}return g}var g,h,i="undefined"==typeof window&&"undefined"==typeof WorkerGlobalScope;a.prototype.transpiler="traceur",a.prototype.transpile=function(a){if(!g&&("babel"==this.transpiler?(g=d,h=i?require("babel-core"):__global.babel):"typescript"==this.transpiler?(g=f,h=i?require("typescript"):__global.ts):(g=b,h=i?require("traceur"):__global.traceur),!h))throw new TypeError("Include Traceur, Babel or TypeScript for module syntax support.");return'var __moduleAddress = "'+a.address+'";'+g.call(this,a)}}(__global.LoaderPolyfill);var $__Object$getPrototypeOf=Object.getPrototypeOf,$__Object$defineProperty=Object.defineProperty,$__Object$create=Object.create;!function(){function a(a){var b=String(a).replace(/^\s+|\s+$/g,"").match(/^([^:\/?#]+:)?(\/\/(?:[^:@\/?#]*(?::[^:@\/?#]*)?@)?(([^:\/?#]*)(?::(\d*))?))?([^?#]*)(\?[^#]*)?(#[\s\S]*)?/);return b?{href:b[0]||"",protocol:b[1]||"",authority:b[2]||"",host:b[3]||"",hostname:b[4]||"",port:b[5]||"",pathname:b[6]||"",search:b[7]||"",hash:b[8]||""}:null}function b(a){var b=[];return a.replace(/^(\.\.?(\/|$))+/,"").replace(/\/(\.(\/|$))+/g,"/").replace(/\/\.\.$/,"/../").replace(/\/?[^\/]*/g,function(a){"/.."===a?b.pop():b.push(a)}),b.join("").replace(/^\//,"/"===a.charAt(0)?"/":"")}function c(c,d){return d=a(d||""),c=a(c||""),d&&c?(d.protocol||c.protocol)+(d.protocol||d.authority?d.authority:c.authority)+b(d.protocol||d.authority||"/"===d.pathname.charAt(0)?d.pathname:d.pathname?(c.authority&&!c.pathname?"/":"")+c.pathname.slice(0,c.pathname.lastIndexOf("/")+1)+d.pathname:c.pathname)+(d.protocol||d.authority||d.pathname?d.search:d.search||c.search)+d.hash:null}function d(){document.removeEventListener("DOMContentLoaded",d,!1),window.removeEventListener("load",d,!1),e()}function e(){for(var a=document.getElementsByTagName("script"),b=0;b<a.length;b++){var c=a[b];if("module"==c.type){var d=c.innerHTML.substr(1);__global.System.module(d)["catch"](function(a){setTimeout(function(){throw a})})}}}var f,g="undefined"!=typeof self&&"undefined"!=typeof WorkerGlobalScope&&self instanceof WorkerGlobalScope,h="undefined"!=typeof window&&!g,i="undefined"!=typeof process&&!!process.platform.match(/^win/),j=__global.Promise||require("when/es6-shim/Promise");if("undefined"!=typeof XMLHttpRequest)f=function(a,b,c){function d(){b(f.responseText)}function e(){c(f.statusText+": "+a||"XHR error")}var f=new XMLHttpRequest,g=!0,h=!1;if(!("withCredentials"in f)){var i=/^(\w+:)?\/\/([^\/]+)/.exec(a);i&&(g=i[2]===window.location.host,i[1]&&(g&=i[1]===window.location.protocol))}g||"undefined"==typeof XDomainRequest||(f=new XDomainRequest,f.onload=d,f.onerror=e,f.ontimeout=e,f.onprogress=function(){},f.timeout=0,h=!0),f.onreadystatechange=function(){4===f.readyState&&(200===f.status||0==f.status&&f.responseText?d():e())},f.open("GET",a,!0),h&&setTimeout(function(){f.send()},0),f.send(null)};else{if("undefined"==typeof require)throw new TypeError("No environment fetch API available.");var k;f=function(a,b,c){if("file:"!=a.substr(0,5))throw"Only file URLs of the form file: allowed running in Node.";return k=k||require("fs"),a=a.substr(5),i&&(a=a.replace(/\//g,"\\")),k.readFile(a,function(a,d){return a?c(a):void b(d+"")})}}var l=function(a){function b(b){if(a.call(this,b||{}),"undefined"!=typeof location&&location.href){var c=__global.location.href.split("#")[0].split("?")[0];this.baseURL=c.substring(0,c.lastIndexOf("/")+1)}else{if("undefined"==typeof process||!process.cwd)throw new TypeError("No environment baseURL");this.baseURL="file:"+process.cwd()+"/",i&&(this.baseURL=this.baseURL.replace(/\\/g,"/"))}this.paths={"*":"*.js"}}return b.__proto__=null!==a?a:Function.prototype,b.prototype=$__Object$create(null!==a?a.prototype:null),$__Object$defineProperty(b.prototype,"constructor",{value:b}),$__Object$defineProperty(b.prototype,"global",{get:function(){return h?window:g?self:__global},enumerable:!1}),$__Object$defineProperty(b.prototype,"strict",{get:function(){return!0},enumerable:!1}),$__Object$defineProperty(b.prototype,"normalize",{value:function(a,b){if("string"!=typeof a)throw new TypeError("Module name must be a string");var c=a.split("/");if(0==c.length)throw new TypeError("No module name provided");var d=0,e=!1,f=0;if("."==c[0]){if(d++,d==c.length)throw new TypeError('Illegal module name "'+a+'"');e=!0}else{for(;".."==c[d];)if(d++,d==c.length)throw new TypeError('Illegal module name "'+a+'"');d&&(e=!0),f=d}for(var g=d;g<c.length;g++){var h=c[g];if(""==h||"."==h||".."==h)throw new TypeError('Illegal module name "'+a+'"')}if(!e)return a;{var i=[],j=(b||"").split("/");j.length-1-f}return i=i.concat(j.splice(0,j.length-1-f)),i=i.concat(c.splice(d,c.length-d)),i.join("/")},enumerable:!1,writable:!0}),$__Object$defineProperty(b.prototype,"locate",{value:function(a){var b,d=a.name,e="";for(var f in this.paths){var g=f.split("*");if(g.length>2)throw new TypeError("Only one wildcard in a path is permitted");if(1==g.length){if(d==f&&f.length>e.length){e=f;break}}else d.substr(0,g[0].length)==g[0]&&d.substr(d.length-g[1].length)==g[1]&&(e=f,b=d.substr(g[0].length,d.length-g[1].length-g[0].length))}var i=this.paths[e];return b&&(i=i.replace("*",b)),h&&(i=i.replace(/#/g,"%23")),c(this.baseURL,i)},enumerable:!1,writable:!0}),$__Object$defineProperty(b.prototype,"fetch",{value:function(a){var b=this;return new j(function(d,e){f(c(b.baseURL,a.address),function(a){d(a)},e)})},enumerable:!1,writable:!0}),b}(__global.LoaderPolyfill),m=new l;if("object"==typeof exports&&(module.exports=m),__global.System=m,h&&"undefined"!=typeof document.getElementsByTagName){var n=document.getElementsByTagName("script");n=n[n.length-1],"complete"===document.readyState?setTimeout(e):document.addEventListener&&(document.addEventListener("DOMContentLoaded",d,!1),window.addEventListener("load",d,!1)),n.getAttribute("data-init")&&window[n.getAttribute("data-init")]()}}()}("undefined"!=typeof window?window:"undefined"!=typeof WorkerGlobalScope?self:global);
-//# sourceMappingURL=es6-module-loader.js.map
+/**
+ * ES6 global Promise shim
+ */
+var unhandledRejections = require('../lib/decorators/unhandledRejection');
+var PromiseConstructor = unhandledRejections(require('../lib/Promise'));
+
+module.exports = typeof global != 'undefined' ? (global.Promise = PromiseConstructor)
+	           : typeof self   != 'undefined' ? (self.Promise   = PromiseConstructor)
+	           : PromiseConstructor;
+
+},{"../lib/Promise":2,"../lib/decorators/unhandledRejection":4}],2:[function(require,module,exports){
+/** @license MIT License (c) copyright 2010-2014 original author or authors */
+/** @author Brian Cavalier */
+/** @author John Hann */
+
+(function(define) { 'use strict';
+define(function (require) {
+
+	var makePromise = require('./makePromise');
+	var Scheduler = require('./Scheduler');
+	var async = require('./env').asap;
+
+	return makePromise({
+		scheduler: new Scheduler(async)
+	});
+
+});
+})(typeof define === 'function' && define.amd ? define : function (factory) { module.exports = factory(require); });
+
+},{"./Scheduler":3,"./env":5,"./makePromise":7}],3:[function(require,module,exports){
+/** @license MIT License (c) copyright 2010-2014 original author or authors */
+/** @author Brian Cavalier */
+/** @author John Hann */
+
+(function(define) { 'use strict';
+define(function() {
+
+	// Credit to Twisol (https://github.com/Twisol) for suggesting
+	// this type of extensible queue + trampoline approach for next-tick conflation.
+
+	/**
+	 * Async task scheduler
+	 * @param {function} async function to schedule a single async function
+	 * @constructor
+	 */
+	function Scheduler(async) {
+		this._async = async;
+		this._running = false;
+
+		this._queue = this;
+		this._queueLen = 0;
+		this._afterQueue = {};
+		this._afterQueueLen = 0;
+
+		var self = this;
+		this.drain = function() {
+			self._drain();
+		};
+	}
+
+	/**
+	 * Enqueue a task
+	 * @param {{ run:function }} task
+	 */
+	Scheduler.prototype.enqueue = function(task) {
+		this._queue[this._queueLen++] = task;
+		this.run();
+	};
+
+	/**
+	 * Enqueue a task to run after the main task queue
+	 * @param {{ run:function }} task
+	 */
+	Scheduler.prototype.afterQueue = function(task) {
+		this._afterQueue[this._afterQueueLen++] = task;
+		this.run();
+	};
+
+	Scheduler.prototype.run = function() {
+		if (!this._running) {
+			this._running = true;
+			this._async(this.drain);
+		}
+	};
+
+	/**
+	 * Drain the handler queue entirely, and then the after queue
+	 */
+	Scheduler.prototype._drain = function() {
+		var i = 0;
+		for (; i < this._queueLen; ++i) {
+			this._queue[i].run();
+			this._queue[i] = void 0;
+		}
+
+		this._queueLen = 0;
+		this._running = false;
+
+		for (i = 0; i < this._afterQueueLen; ++i) {
+			this._afterQueue[i].run();
+			this._afterQueue[i] = void 0;
+		}
+
+		this._afterQueueLen = 0;
+	};
+
+	return Scheduler;
+
+});
+}(typeof define === 'function' && define.amd ? define : function(factory) { module.exports = factory(); }));
+
+},{}],4:[function(require,module,exports){
+/** @license MIT License (c) copyright 2010-2014 original author or authors */
+/** @author Brian Cavalier */
+/** @author John Hann */
+
+(function(define) { 'use strict';
+define(function(require) {
+
+	var setTimer = require('../env').setTimer;
+	var format = require('../format');
+
+	return function unhandledRejection(Promise) {
+
+		var logError = noop;
+		var logInfo = noop;
+		var localConsole;
+
+		if(typeof console !== 'undefined') {
+			// Alias console to prevent things like uglify's drop_console option from
+			// removing console.log/error. Unhandled rejections fall into the same
+			// category as uncaught exceptions, and build tools shouldn't silence them.
+			localConsole = console;
+			logError = typeof localConsole.error !== 'undefined'
+				? function (e) { localConsole.error(e); }
+				: function (e) { localConsole.log(e); };
+
+			logInfo = typeof localConsole.info !== 'undefined'
+				? function (e) { localConsole.info(e); }
+				: function (e) { localConsole.log(e); };
+		}
+
+		Promise.onPotentiallyUnhandledRejection = function(rejection) {
+			enqueue(report, rejection);
+		};
+
+		Promise.onPotentiallyUnhandledRejectionHandled = function(rejection) {
+			enqueue(unreport, rejection);
+		};
+
+		Promise.onFatalRejection = function(rejection) {
+			enqueue(throwit, rejection.value);
+		};
+
+		var tasks = [];
+		var reported = [];
+		var running = null;
+
+		function report(r) {
+			if(!r.handled) {
+				reported.push(r);
+				logError('Potentially unhandled rejection [' + r.id + '] ' + format.formatError(r.value));
+			}
+		}
+
+		function unreport(r) {
+			var i = reported.indexOf(r);
+			if(i >= 0) {
+				reported.splice(i, 1);
+				logInfo('Handled previous rejection [' + r.id + '] ' + format.formatObject(r.value));
+			}
+		}
+
+		function enqueue(f, x) {
+			tasks.push(f, x);
+			if(running === null) {
+				running = setTimer(flush, 0);
+			}
+		}
+
+		function flush() {
+			running = null;
+			while(tasks.length > 0) {
+				tasks.shift()(tasks.shift());
+			}
+		}
+
+		return Promise;
+	};
+
+	function throwit(e) {
+		throw e;
+	}
+
+	function noop() {}
+
+});
+}(typeof define === 'function' && define.amd ? define : function(factory) { module.exports = factory(require); }));
+
+},{"../env":5,"../format":6}],5:[function(require,module,exports){
+/** @license MIT License (c) copyright 2010-2014 original author or authors */
+/** @author Brian Cavalier */
+/** @author John Hann */
+
+/*global process,document,setTimeout,clearTimeout,MutationObserver,WebKitMutationObserver*/
+(function(define) { 'use strict';
+define(function(require) {
+	/*jshint maxcomplexity:6*/
+
+	// Sniff "best" async scheduling option
+	// Prefer process.nextTick or MutationObserver, then check for
+	// setTimeout, and finally vertx, since its the only env that doesn't
+	// have setTimeout
+
+	var MutationObs;
+	var capturedSetTimeout = typeof setTimeout !== 'undefined' && setTimeout;
+
+	// Default env
+	var setTimer = function(f, ms) { return setTimeout(f, ms); };
+	var clearTimer = function(t) { return clearTimeout(t); };
+	var asap = function (f) { return capturedSetTimeout(f, 0); };
+
+	// Detect specific env
+	if (isNode()) { // Node
+		asap = function (f) { return process.nextTick(f); };
+
+	} else if (MutationObs = hasMutationObserver()) { // Modern browser
+		asap = initMutationObserver(MutationObs);
+
+	} else if (!capturedSetTimeout) { // vert.x
+		var vertxRequire = require;
+		var vertx = vertxRequire('vertx');
+		setTimer = function (f, ms) { return vertx.setTimer(ms, f); };
+		clearTimer = vertx.cancelTimer;
+		asap = vertx.runOnLoop || vertx.runOnContext;
+	}
+
+	return {
+		setTimer: setTimer,
+		clearTimer: clearTimer,
+		asap: asap
+	};
+
+	function isNode () {
+		return typeof process !== 'undefined' && process !== null &&
+			typeof process.nextTick === 'function';
+	}
+
+	function hasMutationObserver () {
+		return (typeof MutationObserver === 'function' && MutationObserver) ||
+			(typeof WebKitMutationObserver === 'function' && WebKitMutationObserver);
+	}
+
+	function initMutationObserver(MutationObserver) {
+		var scheduled;
+		var node = document.createTextNode('');
+		var o = new MutationObserver(run);
+		o.observe(node, { characterData: true });
+
+		function run() {
+			var f = scheduled;
+			scheduled = void 0;
+			f();
+		}
+
+		var i = 0;
+		return function (f) {
+			scheduled = f;
+			node.data = (i ^= 1);
+		};
+	}
+});
+}(typeof define === 'function' && define.amd ? define : function(factory) { module.exports = factory(require); }));
+
+},{}],6:[function(require,module,exports){
+/** @license MIT License (c) copyright 2010-2014 original author or authors */
+/** @author Brian Cavalier */
+/** @author John Hann */
+
+(function(define) { 'use strict';
+define(function() {
+
+	return {
+		formatError: formatError,
+		formatObject: formatObject,
+		tryStringify: tryStringify
+	};
+
+	/**
+	 * Format an error into a string.  If e is an Error and has a stack property,
+	 * it's returned.  Otherwise, e is formatted using formatObject, with a
+	 * warning added about e not being a proper Error.
+	 * @param {*} e
+	 * @returns {String} formatted string, suitable for output to developers
+	 */
+	function formatError(e) {
+		var s = typeof e === 'object' && e !== null && e.stack ? e.stack : formatObject(e);
+		return e instanceof Error ? s : s + ' (WARNING: non-Error used)';
+	}
+
+	/**
+	 * Format an object, detecting "plain" objects and running them through
+	 * JSON.stringify if possible.
+	 * @param {Object} o
+	 * @returns {string}
+	 */
+	function formatObject(o) {
+		var s = String(o);
+		if(s === '[object Object]' && typeof JSON !== 'undefined') {
+			s = tryStringify(o, s);
+		}
+		return s;
+	}
+
+	/**
+	 * Try to return the result of JSON.stringify(x).  If that fails, return
+	 * defaultValue
+	 * @param {*} x
+	 * @param {*} defaultValue
+	 * @returns {String|*} JSON.stringify(x) or defaultValue
+	 */
+	function tryStringify(x, defaultValue) {
+		try {
+			return JSON.stringify(x);
+		} catch(e) {
+			return defaultValue;
+		}
+	}
+
+});
+}(typeof define === 'function' && define.amd ? define : function(factory) { module.exports = factory(); }));
+
+},{}],7:[function(require,module,exports){
+/** @license MIT License (c) copyright 2010-2014 original author or authors */
+/** @author Brian Cavalier */
+/** @author John Hann */
+
+(function(define) { 'use strict';
+define(function() {
+
+	return function makePromise(environment) {
+
+		var tasks = environment.scheduler;
+		var emitRejection = initEmitRejection();
+
+		var objectCreate = Object.create ||
+			function(proto) {
+				function Child() {}
+				Child.prototype = proto;
+				return new Child();
+			};
+
+		/**
+		 * Create a promise whose fate is determined by resolver
+		 * @constructor
+		 * @returns {Promise} promise
+		 * @name Promise
+		 */
+		function Promise(resolver, handler) {
+			this._handler = resolver === Handler ? handler : init(resolver);
+		}
+
+		/**
+		 * Run the supplied resolver
+		 * @param resolver
+		 * @returns {Pending}
+		 */
+		function init(resolver) {
+			var handler = new Pending();
+
+			try {
+				resolver(promiseResolve, promiseReject, promiseNotify);
+			} catch (e) {
+				promiseReject(e);
+			}
+
+			return handler;
+
+			/**
+			 * Transition from pre-resolution state to post-resolution state, notifying
+			 * all listeners of the ultimate fulfillment or rejection
+			 * @param {*} x resolution value
+			 */
+			function promiseResolve (x) {
+				handler.resolve(x);
+			}
+			/**
+			 * Reject this promise with reason, which will be used verbatim
+			 * @param {Error|*} reason rejection reason, strongly suggested
+			 *   to be an Error type
+			 */
+			function promiseReject (reason) {
+				handler.reject(reason);
+			}
+
+			/**
+			 * @deprecated
+			 * Issue a progress event, notifying all progress listeners
+			 * @param {*} x progress event payload to pass to all listeners
+			 */
+			function promiseNotify (x) {
+				handler.notify(x);
+			}
+		}
+
+		// Creation
+
+		Promise.resolve = resolve;
+		Promise.reject = reject;
+		Promise.never = never;
+
+		Promise._defer = defer;
+		Promise._handler = getHandler;
+
+		/**
+		 * Returns a trusted promise. If x is already a trusted promise, it is
+		 * returned, otherwise returns a new trusted Promise which follows x.
+		 * @param  {*} x
+		 * @return {Promise} promise
+		 */
+		function resolve(x) {
+			return isPromise(x) ? x
+				: new Promise(Handler, new Async(getHandler(x)));
+		}
+
+		/**
+		 * Return a reject promise with x as its reason (x is used verbatim)
+		 * @param {*} x
+		 * @returns {Promise} rejected promise
+		 */
+		function reject(x) {
+			return new Promise(Handler, new Async(new Rejected(x)));
+		}
+
+		/**
+		 * Return a promise that remains pending forever
+		 * @returns {Promise} forever-pending promise.
+		 */
+		function never() {
+			return foreverPendingPromise; // Should be frozen
+		}
+
+		/**
+		 * Creates an internal {promise, resolver} pair
+		 * @private
+		 * @returns {Promise}
+		 */
+		function defer() {
+			return new Promise(Handler, new Pending());
+		}
+
+		// Transformation and flow control
+
+		/**
+		 * Transform this promise's fulfillment value, returning a new Promise
+		 * for the transformed result.  If the promise cannot be fulfilled, onRejected
+		 * is called with the reason.  onProgress *may* be called with updates toward
+		 * this promise's fulfillment.
+		 * @param {function=} onFulfilled fulfillment handler
+		 * @param {function=} onRejected rejection handler
+		 * @param {function=} onProgress @deprecated progress handler
+		 * @return {Promise} new promise
+		 */
+		Promise.prototype.then = function(onFulfilled, onRejected, onProgress) {
+			var parent = this._handler;
+			var state = parent.join().state();
+
+			if ((typeof onFulfilled !== 'function' && state > 0) ||
+				(typeof onRejected !== 'function' && state < 0)) {
+				// Short circuit: value will not change, simply share handler
+				return new this.constructor(Handler, parent);
+			}
+
+			var p = this._beget();
+			var child = p._handler;
+
+			parent.chain(child, parent.receiver, onFulfilled, onRejected, onProgress);
+
+			return p;
+		};
+
+		/**
+		 * If this promise cannot be fulfilled due to an error, call onRejected to
+		 * handle the error. Shortcut for .then(undefined, onRejected)
+		 * @param {function?} onRejected
+		 * @return {Promise}
+		 */
+		Promise.prototype['catch'] = function(onRejected) {
+			return this.then(void 0, onRejected);
+		};
+
+		/**
+		 * Creates a new, pending promise of the same type as this promise
+		 * @private
+		 * @returns {Promise}
+		 */
+		Promise.prototype._beget = function() {
+			return begetFrom(this._handler, this.constructor);
+		};
+
+		function begetFrom(parent, Promise) {
+			var child = new Pending(parent.receiver, parent.join().context);
+			return new Promise(Handler, child);
+		}
+
+		// Array combinators
+
+		Promise.all = all;
+		Promise.race = race;
+		Promise._traverse = traverse;
+
+		/**
+		 * Return a promise that will fulfill when all promises in the
+		 * input array have fulfilled, or will reject when one of the
+		 * promises rejects.
+		 * @param {array} promises array of promises
+		 * @returns {Promise} promise for array of fulfillment values
+		 */
+		function all(promises) {
+			return traverseWith(snd, null, promises);
+		}
+
+		/**
+		 * Array<Promise<X>> -> Promise<Array<f(X)>>
+		 * @private
+		 * @param {function} f function to apply to each promise's value
+		 * @param {Array} promises array of promises
+		 * @returns {Promise} promise for transformed values
+		 */
+		function traverse(f, promises) {
+			return traverseWith(tryCatch2, f, promises);
+		}
+
+		function traverseWith(tryMap, f, promises) {
+			var handler = typeof f === 'function' ? mapAt : settleAt;
+
+			var resolver = new Pending();
+			var pending = promises.length >>> 0;
+			var results = new Array(pending);
+
+			for (var i = 0, x; i < promises.length && !resolver.resolved; ++i) {
+				x = promises[i];
+
+				if (x === void 0 && !(i in promises)) {
+					--pending;
+					continue;
+				}
+
+				traverseAt(promises, handler, i, x, resolver);
+			}
+
+			if(pending === 0) {
+				resolver.become(new Fulfilled(results));
+			}
+
+			return new Promise(Handler, resolver);
+
+			function mapAt(i, x, resolver) {
+				if(!resolver.resolved) {
+					traverseAt(promises, settleAt, i, tryMap(f, x, i), resolver);
+				}
+			}
+
+			function settleAt(i, x, resolver) {
+				results[i] = x;
+				if(--pending === 0) {
+					resolver.become(new Fulfilled(results));
+				}
+			}
+		}
+
+		function traverseAt(promises, handler, i, x, resolver) {
+			if (maybeThenable(x)) {
+				var h = getHandlerMaybeThenable(x);
+				var s = h.state();
+
+				if (s === 0) {
+					h.fold(handler, i, void 0, resolver);
+				} else if (s > 0) {
+					handler(i, h.value, resolver);
+				} else {
+					resolver.become(h);
+					visitRemaining(promises, i+1, h);
+				}
+			} else {
+				handler(i, x, resolver);
+			}
+		}
+
+		Promise._visitRemaining = visitRemaining;
+		function visitRemaining(promises, start, handler) {
+			for(var i=start; i<promises.length; ++i) {
+				markAsHandled(getHandler(promises[i]), handler);
+			}
+		}
+
+		function markAsHandled(h, handler) {
+			if(h === handler) {
+				return;
+			}
+
+			var s = h.state();
+			if(s === 0) {
+				h.visit(h, void 0, h._unreport);
+			} else if(s < 0) {
+				h._unreport();
+			}
+		}
+
+		/**
+		 * Fulfill-reject competitive race. Return a promise that will settle
+		 * to the same state as the earliest input promise to settle.
+		 *
+		 * WARNING: The ES6 Promise spec requires that race()ing an empty array
+		 * must return a promise that is pending forever.  This implementation
+		 * returns a singleton forever-pending promise, the same singleton that is
+		 * returned by Promise.never(), thus can be checked with ===
+		 *
+		 * @param {array} promises array of promises to race
+		 * @returns {Promise} if input is non-empty, a promise that will settle
+		 * to the same outcome as the earliest input promise to settle. if empty
+		 * is empty, returns a promise that will never settle.
+		 */
+		function race(promises) {
+			if(typeof promises !== 'object' || promises === null) {
+				return reject(new TypeError('non-iterable passed to race()'));
+			}
+
+			// Sigh, race([]) is untestable unless we return *something*
+			// that is recognizable without calling .then() on it.
+			return promises.length === 0 ? never()
+				 : promises.length === 1 ? resolve(promises[0])
+				 : runRace(promises);
+		}
+
+		function runRace(promises) {
+			var resolver = new Pending();
+			var i, x, h;
+			for(i=0; i<promises.length; ++i) {
+				x = promises[i];
+				if (x === void 0 && !(i in promises)) {
+					continue;
+				}
+
+				h = getHandler(x);
+				if(h.state() !== 0) {
+					resolver.become(h);
+					visitRemaining(promises, i+1, h);
+					break;
+				} else {
+					h.visit(resolver, resolver.resolve, resolver.reject);
+				}
+			}
+			return new Promise(Handler, resolver);
+		}
+
+		// Promise internals
+		// Below this, everything is @private
+
+		/**
+		 * Get an appropriate handler for x, without checking for cycles
+		 * @param {*} x
+		 * @returns {object} handler
+		 */
+		function getHandler(x) {
+			if(isPromise(x)) {
+				return x._handler.join();
+			}
+			return maybeThenable(x) ? getHandlerUntrusted(x) : new Fulfilled(x);
+		}
+
+		/**
+		 * Get a handler for thenable x.
+		 * NOTE: You must only call this if maybeThenable(x) == true
+		 * @param {object|function|Promise} x
+		 * @returns {object} handler
+		 */
+		function getHandlerMaybeThenable(x) {
+			return isPromise(x) ? x._handler.join() : getHandlerUntrusted(x);
+		}
+
+		/**
+		 * Get a handler for potentially untrusted thenable x
+		 * @param {*} x
+		 * @returns {object} handler
+		 */
+		function getHandlerUntrusted(x) {
+			try {
+				var untrustedThen = x.then;
+				return typeof untrustedThen === 'function'
+					? new Thenable(untrustedThen, x)
+					: new Fulfilled(x);
+			} catch(e) {
+				return new Rejected(e);
+			}
+		}
+
+		/**
+		 * Handler for a promise that is pending forever
+		 * @constructor
+		 */
+		function Handler() {}
+
+		Handler.prototype.when
+			= Handler.prototype.become
+			= Handler.prototype.notify // deprecated
+			= Handler.prototype.fail
+			= Handler.prototype._unreport
+			= Handler.prototype._report
+			= noop;
+
+		Handler.prototype._state = 0;
+
+		Handler.prototype.state = function() {
+			return this._state;
+		};
+
+		/**
+		 * Recursively collapse handler chain to find the handler
+		 * nearest to the fully resolved value.
+		 * @returns {object} handler nearest the fully resolved value
+		 */
+		Handler.prototype.join = function() {
+			var h = this;
+			while(h.handler !== void 0) {
+				h = h.handler;
+			}
+			return h;
+		};
+
+		Handler.prototype.chain = function(to, receiver, fulfilled, rejected, progress) {
+			this.when({
+				resolver: to,
+				receiver: receiver,
+				fulfilled: fulfilled,
+				rejected: rejected,
+				progress: progress
+			});
+		};
+
+		Handler.prototype.visit = function(receiver, fulfilled, rejected, progress) {
+			this.chain(failIfRejected, receiver, fulfilled, rejected, progress);
+		};
+
+		Handler.prototype.fold = function(f, z, c, to) {
+			this.when(new Fold(f, z, c, to));
+		};
+
+		/**
+		 * Handler that invokes fail() on any handler it becomes
+		 * @constructor
+		 */
+		function FailIfRejected() {}
+
+		inherit(Handler, FailIfRejected);
+
+		FailIfRejected.prototype.become = function(h) {
+			h.fail();
+		};
+
+		var failIfRejected = new FailIfRejected();
+
+		/**
+		 * Handler that manages a queue of consumers waiting on a pending promise
+		 * @constructor
+		 */
+		function Pending(receiver, inheritedContext) {
+			Promise.createContext(this, inheritedContext);
+
+			this.consumers = void 0;
+			this.receiver = receiver;
+			this.handler = void 0;
+			this.resolved = false;
+		}
+
+		inherit(Handler, Pending);
+
+		Pending.prototype._state = 0;
+
+		Pending.prototype.resolve = function(x) {
+			this.become(getHandler(x));
+		};
+
+		Pending.prototype.reject = function(x) {
+			if(this.resolved) {
+				return;
+			}
+
+			this.become(new Rejected(x));
+		};
+
+		Pending.prototype.join = function() {
+			if (!this.resolved) {
+				return this;
+			}
+
+			var h = this;
+
+			while (h.handler !== void 0) {
+				h = h.handler;
+				if (h === this) {
+					return this.handler = cycle();
+				}
+			}
+
+			return h;
+		};
+
+		Pending.prototype.run = function() {
+			var q = this.consumers;
+			var handler = this.handler;
+			this.handler = this.handler.join();
+			this.consumers = void 0;
+
+			for (var i = 0; i < q.length; ++i) {
+				handler.when(q[i]);
+			}
+		};
+
+		Pending.prototype.become = function(handler) {
+			if(this.resolved) {
+				return;
+			}
+
+			this.resolved = true;
+			this.handler = handler;
+			if(this.consumers !== void 0) {
+				tasks.enqueue(this);
+			}
+
+			if(this.context !== void 0) {
+				handler._report(this.context);
+			}
+		};
+
+		Pending.prototype.when = function(continuation) {
+			if(this.resolved) {
+				tasks.enqueue(new ContinuationTask(continuation, this.handler));
+			} else {
+				if(this.consumers === void 0) {
+					this.consumers = [continuation];
+				} else {
+					this.consumers.push(continuation);
+				}
+			}
+		};
+
+		/**
+		 * @deprecated
+		 */
+		Pending.prototype.notify = function(x) {
+			if(!this.resolved) {
+				tasks.enqueue(new ProgressTask(x, this));
+			}
+		};
+
+		Pending.prototype.fail = function(context) {
+			var c = typeof context === 'undefined' ? this.context : context;
+			this.resolved && this.handler.join().fail(c);
+		};
+
+		Pending.prototype._report = function(context) {
+			this.resolved && this.handler.join()._report(context);
+		};
+
+		Pending.prototype._unreport = function() {
+			this.resolved && this.handler.join()._unreport();
+		};
+
+		/**
+		 * Wrap another handler and force it into a future stack
+		 * @param {object} handler
+		 * @constructor
+		 */
+		function Async(handler) {
+			this.handler = handler;
+		}
+
+		inherit(Handler, Async);
+
+		Async.prototype.when = function(continuation) {
+			tasks.enqueue(new ContinuationTask(continuation, this));
+		};
+
+		Async.prototype._report = function(context) {
+			this.join()._report(context);
+		};
+
+		Async.prototype._unreport = function() {
+			this.join()._unreport();
+		};
+
+		/**
+		 * Handler that wraps an untrusted thenable and assimilates it in a future stack
+		 * @param {function} then
+		 * @param {{then: function}} thenable
+		 * @constructor
+		 */
+		function Thenable(then, thenable) {
+			Pending.call(this);
+			tasks.enqueue(new AssimilateTask(then, thenable, this));
+		}
+
+		inherit(Pending, Thenable);
+
+		/**
+		 * Handler for a fulfilled promise
+		 * @param {*} x fulfillment value
+		 * @constructor
+		 */
+		function Fulfilled(x) {
+			Promise.createContext(this);
+			this.value = x;
+		}
+
+		inherit(Handler, Fulfilled);
+
+		Fulfilled.prototype._state = 1;
+
+		Fulfilled.prototype.fold = function(f, z, c, to) {
+			runContinuation3(f, z, this, c, to);
+		};
+
+		Fulfilled.prototype.when = function(cont) {
+			runContinuation1(cont.fulfilled, this, cont.receiver, cont.resolver);
+		};
+
+		var errorId = 0;
+
+		/**
+		 * Handler for a rejected promise
+		 * @param {*} x rejection reason
+		 * @constructor
+		 */
+		function Rejected(x) {
+			Promise.createContext(this);
+
+			this.id = ++errorId;
+			this.value = x;
+			this.handled = false;
+			this.reported = false;
+
+			this._report();
+		}
+
+		inherit(Handler, Rejected);
+
+		Rejected.prototype._state = -1;
+
+		Rejected.prototype.fold = function(f, z, c, to) {
+			to.become(this);
+		};
+
+		Rejected.prototype.when = function(cont) {
+			if(typeof cont.rejected === 'function') {
+				this._unreport();
+			}
+			runContinuation1(cont.rejected, this, cont.receiver, cont.resolver);
+		};
+
+		Rejected.prototype._report = function(context) {
+			tasks.afterQueue(new ReportTask(this, context));
+		};
+
+		Rejected.prototype._unreport = function() {
+			if(this.handled) {
+				return;
+			}
+			this.handled = true;
+			tasks.afterQueue(new UnreportTask(this));
+		};
+
+		Rejected.prototype.fail = function(context) {
+			this.reported = true;
+			emitRejection('unhandledRejection', this);
+			Promise.onFatalRejection(this, context === void 0 ? this.context : context);
+		};
+
+		function ReportTask(rejection, context) {
+			this.rejection = rejection;
+			this.context = context;
+		}
+
+		ReportTask.prototype.run = function() {
+			if(!this.rejection.handled && !this.rejection.reported) {
+				this.rejection.reported = true;
+				emitRejection('unhandledRejection', this.rejection) ||
+					Promise.onPotentiallyUnhandledRejection(this.rejection, this.context);
+			}
+		};
+
+		function UnreportTask(rejection) {
+			this.rejection = rejection;
+		}
+
+		UnreportTask.prototype.run = function() {
+			if(this.rejection.reported) {
+				emitRejection('rejectionHandled', this.rejection) ||
+					Promise.onPotentiallyUnhandledRejectionHandled(this.rejection);
+			}
+		};
+
+		// Unhandled rejection hooks
+		// By default, everything is a noop
+
+		Promise.createContext
+			= Promise.enterContext
+			= Promise.exitContext
+			= Promise.onPotentiallyUnhandledRejection
+			= Promise.onPotentiallyUnhandledRejectionHandled
+			= Promise.onFatalRejection
+			= noop;
+
+		// Errors and singletons
+
+		var foreverPendingHandler = new Handler();
+		var foreverPendingPromise = new Promise(Handler, foreverPendingHandler);
+
+		function cycle() {
+			return new Rejected(new TypeError('Promise cycle'));
+		}
+
+		// Task runners
+
+		/**
+		 * Run a single consumer
+		 * @constructor
+		 */
+		function ContinuationTask(continuation, handler) {
+			this.continuation = continuation;
+			this.handler = handler;
+		}
+
+		ContinuationTask.prototype.run = function() {
+			this.handler.join().when(this.continuation);
+		};
+
+		/**
+		 * Run a queue of progress handlers
+		 * @constructor
+		 */
+		function ProgressTask(value, handler) {
+			this.handler = handler;
+			this.value = value;
+		}
+
+		ProgressTask.prototype.run = function() {
+			var q = this.handler.consumers;
+			if(q === void 0) {
+				return;
+			}
+
+			for (var c, i = 0; i < q.length; ++i) {
+				c = q[i];
+				runNotify(c.progress, this.value, this.handler, c.receiver, c.resolver);
+			}
+		};
+
+		/**
+		 * Assimilate a thenable, sending it's value to resolver
+		 * @param {function} then
+		 * @param {object|function} thenable
+		 * @param {object} resolver
+		 * @constructor
+		 */
+		function AssimilateTask(then, thenable, resolver) {
+			this._then = then;
+			this.thenable = thenable;
+			this.resolver = resolver;
+		}
+
+		AssimilateTask.prototype.run = function() {
+			var h = this.resolver;
+			tryAssimilate(this._then, this.thenable, _resolve, _reject, _notify);
+
+			function _resolve(x) { h.resolve(x); }
+			function _reject(x)  { h.reject(x); }
+			function _notify(x)  { h.notify(x); }
+		};
+
+		function tryAssimilate(then, thenable, resolve, reject, notify) {
+			try {
+				then.call(thenable, resolve, reject, notify);
+			} catch (e) {
+				reject(e);
+			}
+		}
+
+		/**
+		 * Fold a handler value with z
+		 * @constructor
+		 */
+		function Fold(f, z, c, to) {
+			this.f = f; this.z = z; this.c = c; this.to = to;
+			this.resolver = failIfRejected;
+			this.receiver = this;
+		}
+
+		Fold.prototype.fulfilled = function(x) {
+			this.f.call(this.c, this.z, x, this.to);
+		};
+
+		Fold.prototype.rejected = function(x) {
+			this.to.reject(x);
+		};
+
+		Fold.prototype.progress = function(x) {
+			this.to.notify(x);
+		};
+
+		// Other helpers
+
+		/**
+		 * @param {*} x
+		 * @returns {boolean} true iff x is a trusted Promise
+		 */
+		function isPromise(x) {
+			return x instanceof Promise;
+		}
+
+		/**
+		 * Test just enough to rule out primitives, in order to take faster
+		 * paths in some code
+		 * @param {*} x
+		 * @returns {boolean} false iff x is guaranteed *not* to be a thenable
+		 */
+		function maybeThenable(x) {
+			return (typeof x === 'object' || typeof x === 'function') && x !== null;
+		}
+
+		function runContinuation1(f, h, receiver, next) {
+			if(typeof f !== 'function') {
+				return next.become(h);
+			}
+
+			Promise.enterContext(h);
+			tryCatchReject(f, h.value, receiver, next);
+			Promise.exitContext();
+		}
+
+		function runContinuation3(f, x, h, receiver, next) {
+			if(typeof f !== 'function') {
+				return next.become(h);
+			}
+
+			Promise.enterContext(h);
+			tryCatchReject3(f, x, h.value, receiver, next);
+			Promise.exitContext();
+		}
+
+		/**
+		 * @deprecated
+		 */
+		function runNotify(f, x, h, receiver, next) {
+			if(typeof f !== 'function') {
+				return next.notify(x);
+			}
+
+			Promise.enterContext(h);
+			tryCatchReturn(f, x, receiver, next);
+			Promise.exitContext();
+		}
+
+		function tryCatch2(f, a, b) {
+			try {
+				return f(a, b);
+			} catch(e) {
+				return reject(e);
+			}
+		}
+
+		/**
+		 * Return f.call(thisArg, x), or if it throws return a rejected promise for
+		 * the thrown exception
+		 */
+		function tryCatchReject(f, x, thisArg, next) {
+			try {
+				next.become(getHandler(f.call(thisArg, x)));
+			} catch(e) {
+				next.become(new Rejected(e));
+			}
+		}
+
+		/**
+		 * Same as above, but includes the extra argument parameter.
+		 */
+		function tryCatchReject3(f, x, y, thisArg, next) {
+			try {
+				f.call(thisArg, x, y, next);
+			} catch(e) {
+				next.become(new Rejected(e));
+			}
+		}
+
+		/**
+		 * @deprecated
+		 * Return f.call(thisArg, x), or if it throws, *return* the exception
+		 */
+		function tryCatchReturn(f, x, thisArg, next) {
+			try {
+				next.notify(f.call(thisArg, x));
+			} catch(e) {
+				next.notify(e);
+			}
+		}
+
+		function inherit(Parent, Child) {
+			Child.prototype = objectCreate(Parent.prototype);
+			Child.prototype.constructor = Child;
+		}
+
+		function snd(x, y) {
+			return y;
+		}
+
+		function noop() {}
+
+		function initEmitRejection() {
+			/*global process, self, CustomEvent*/
+			if(typeof process !== 'undefined' && process !== null
+				&& typeof process.emit === 'function') {
+				// Returning falsy here means to call the default
+				// onPotentiallyUnhandledRejection API.  This is safe even in
+				// browserify since process.emit always returns falsy in browserify:
+				// https://github.com/defunctzombie/node-process/blob/master/browser.js#L40-L46
+				return function(type, rejection) {
+					return type === 'unhandledRejection'
+						? process.emit(type, rejection.value, rejection)
+						: process.emit(type, rejection);
+				};
+			} else if(typeof self !== 'undefined' && typeof CustomEvent === 'function') {
+				return (function(noop, self, CustomEvent) {
+					var hasCustomEvent = false;
+					try {
+						var ev = new CustomEvent('unhandledRejection');
+						hasCustomEvent = ev instanceof CustomEvent;
+					} catch (e) {}
+
+					return !hasCustomEvent ? noop : function(type, rejection) {
+						var ev = new CustomEvent(type, {
+							detail: {
+								reason: rejection.value,
+								key: rejection
+							},
+							bubbles: false,
+							cancelable: true
+						});
+
+						return !self.dispatchEvent(ev);
+					};
+				}(noop, self, CustomEvent));
+			}
+
+			return noop;
+		}
+
+		return Promise;
+	};
+});
+}(typeof define === 'function' && define.amd ? define : function(factory) { module.exports = factory(); }));
+
+},{}]},{},[1])
+(1)
+});
+;
+(function(__global) {
+  
+$__Object$getPrototypeOf = Object.getPrototypeOf || function(obj) {
+  return obj.__proto__;
+};
+
+var $__Object$defineProperty;
+(function () {
+  try {
+    if (!!Object.defineProperty({}, 'a', {})) {
+      $__Object$defineProperty = Object.defineProperty;
+    }
+  } catch (e) {
+    $__Object$defineProperty = function (obj, prop, opt) {
+      try {
+        obj[prop] = opt.value || opt.get.call(obj);
+      }
+      catch(e) {}
+    }
+  }
+}());
+
+$__Object$create = Object.create || function(o, props) {
+  function F() {}
+  F.prototype = o;
+
+  if (typeof(props) === "object") {
+    for (prop in props) {
+      if (props.hasOwnProperty((prop))) {
+        F[prop] = props[prop];
+      }
+    }
+  }
+  return new F();
+};
+
+/*
+*********************************************************************************************
+
+  Dynamic Module Loader Polyfill
+
+    - Implemented exactly to the former 2014-08-24 ES6 Specification Draft Rev 27, Section 15
+      http://wiki.ecmascript.org/doku.php?id=harmony:specification_drafts#august_24_2014_draft_rev_27
+
+    - Functions are commented with their spec numbers, with spec differences commented.
+
+    - Spec bugs are commented in this code with links.
+
+    - Abstract functions have been combined where possible, and their associated functions
+      commented.
+
+    - Realm implementation is entirely omitted.
+
+*********************************************************************************************
+*/
+
+// Some Helpers
+
+// logs a linkset snapshot for debugging
+/* function snapshot(loader) {
+  console.log('---Snapshot---');
+  for (var i = 0; i < loader.loads.length; i++) {
+    var load = loader.loads[i];
+    var linkSetLog = '  ' + load.name + ' (' + load.status + '): ';
+
+    for (var j = 0; j < load.linkSets.length; j++) {
+      linkSetLog += '{' + logloads(load.linkSets[j].loads) + '} ';
+    }
+    console.log(linkSetLog);
+  }
+  console.log('');
+}
+function logloads(loads) {
+  var log = '';
+  for (var k = 0; k < loads.length; k++)
+    log += loads[k].name + (k != loads.length - 1 ? ' ' : '');
+  return log;
+} */
+
+
+/* function checkInvariants() {
+  // see https://bugs.ecmascript.org/show_bug.cgi?id=2603#c1
+
+  var loads = System._loader.loads;
+  var linkSets = [];
+
+  for (var i = 0; i < loads.length; i++) {
+    var load = loads[i];
+    console.assert(load.status == 'loading' || load.status == 'loaded', 'Each load is loading or loaded');
+
+    for (var j = 0; j < load.linkSets.length; j++) {
+      var linkSet = load.linkSets[j];
+
+      for (var k = 0; k < linkSet.loads.length; k++)
+        console.assert(loads.indexOf(linkSet.loads[k]) != -1, 'linkSet loads are a subset of loader loads');
+
+      if (linkSets.indexOf(linkSet) == -1)
+        linkSets.push(linkSet);
+    }
+  }
+
+  for (var i = 0; i < loads.length; i++) {
+    var load = loads[i];
+    for (var j = 0; j < linkSets.length; j++) {
+      var linkSet = linkSets[j];
+
+      if (linkSet.loads.indexOf(load) != -1)
+        console.assert(load.linkSets.indexOf(linkSet) != -1, 'linkSet contains load -> load contains linkSet');
+
+      if (load.linkSets.indexOf(linkSet) != -1)
+        console.assert(linkSet.loads.indexOf(load) != -1, 'load contains linkSet -> linkSet contains load');
+    }
+  }
+
+  for (var i = 0; i < linkSets.length; i++) {
+    var linkSet = linkSets[i];
+    for (var j = 0; j < linkSet.loads.length; j++) {
+      var load = linkSet.loads[j];
+
+      for (var k = 0; k < load.dependencies.length; k++) {
+        var depName = load.dependencies[k].value;
+        var depLoad;
+        for (var l = 0; l < loads.length; l++) {
+          if (loads[l].name != depName)
+            continue;
+          depLoad = loads[l];
+          break;
+        }
+
+        // loading records are allowed not to have their dependencies yet
+        // if (load.status != 'loading')
+        //  console.assert(depLoad, 'depLoad found');
+
+        // console.assert(linkSet.loads.indexOf(depLoad) != -1, 'linkset contains all dependencies');
+      }
+    }
+  }
+} */
+
+
+(function() {
+  var Promise = __global.Promise || require('when/es6-shim/Promise');
+  if (__global.console)
+    console.assert = console.assert || function() {};
+
+  // IE8 support
+  var indexOf = Array.prototype.indexOf || function(item) {
+    for (var i = 0, thisLen = this.length; i < thisLen; i++) {
+      if (this[i] === item) {
+        return i;
+      }
+    }
+    return -1;
+  };
+  var defineProperty = $__Object$defineProperty;
+
+  // 15.2.3 - Runtime Semantics: Loader State
+
+  // 15.2.3.11
+  function createLoaderLoad(object) {
+    return {
+      // modules is an object for ES5 implementation
+      modules: {},
+      loads: [],
+      loaderObj: object
+    };
+  }
+
+  // 15.2.3.2 Load Records and LoadRequest Objects
+
+  // 15.2.3.2.1
+  function createLoad(name) {
+    return {
+      status: 'loading',
+      name: name,
+      linkSets: [],
+      dependencies: [],
+      metadata: {}
+    };
+  }
+
+  // 15.2.3.2.2 createLoadRequestObject, absorbed into calling functions
+
+  // 15.2.4
+
+  // 15.2.4.1
+  function loadModule(loader, name, options) {
+    return new Promise(asyncStartLoadPartwayThrough({
+      step: options.address ? 'fetch' : 'locate',
+      loader: loader,
+      moduleName: name,
+      // allow metadata for import https://bugs.ecmascript.org/show_bug.cgi?id=3091
+      moduleMetadata: options && options.metadata || {},
+      moduleSource: options.source,
+      moduleAddress: options.address
+    }));
+  }
+
+  // 15.2.4.2
+  function requestLoad(loader, request, refererName, refererAddress) {
+    // 15.2.4.2.1 CallNormalize
+    return new Promise(function(resolve, reject) {
+      resolve(loader.loaderObj.normalize(request, refererName, refererAddress));
+    })
+    // 15.2.4.2.2 GetOrCreateLoad
+    .then(function(name) {
+      var load;
+      if (loader.modules[name]) {
+        load = createLoad(name);
+        load.status = 'linked';
+        // https://bugs.ecmascript.org/show_bug.cgi?id=2795
+        load.module = loader.modules[name];
+        return load;
+      }
+
+      for (var i = 0, l = loader.loads.length; i < l; i++) {
+        load = loader.loads[i];
+        if (load.name != name)
+          continue;
+        console.assert(load.status == 'loading' || load.status == 'loaded', 'loading or loaded');
+        return load;
+      }
+
+      load = createLoad(name);
+      loader.loads.push(load);
+
+      proceedToLocate(loader, load);
+
+      return load;
+    });
+  }
+
+  // 15.2.4.3
+  function proceedToLocate(loader, load) {
+    proceedToFetch(loader, load,
+      Promise.resolve()
+      // 15.2.4.3.1 CallLocate
+      .then(function() {
+        return loader.loaderObj.locate({ name: load.name, metadata: load.metadata });
+      })
+    );
+  }
+
+  // 15.2.4.4
+  function proceedToFetch(loader, load, p) {
+    proceedToTranslate(loader, load,
+      p
+      // 15.2.4.4.1 CallFetch
+      .then(function(address) {
+        // adjusted, see https://bugs.ecmascript.org/show_bug.cgi?id=2602
+        if (load.status != 'loading')
+          return;
+        load.address = address;
+
+        return loader.loaderObj.fetch({ name: load.name, metadata: load.metadata, address: address });
+      })
+    );
+  }
+
+  var anonCnt = 0;
+
+  // 15.2.4.5
+  function proceedToTranslate(loader, load, p) {
+    p
+    // 15.2.4.5.1 CallTranslate
+    .then(function(source) {
+      if (load.status != 'loading')
+        return;
+
+      return Promise.resolve(loader.loaderObj.translate({ name: load.name, metadata: load.metadata, address: load.address, source: source }))
+
+      // 15.2.4.5.2 CallInstantiate
+      .then(function(source) {
+        load.source = source;
+        return loader.loaderObj.instantiate({ name: load.name, metadata: load.metadata, address: load.address, source: source });
+      })
+
+      // 15.2.4.5.3 InstantiateSucceeded
+      .then(function(instantiateResult) {
+        if (instantiateResult === undefined) {
+          load.address = load.address || '<Anonymous Module ' + ++anonCnt + '>';
+
+          // instead of load.kind, use load.isDeclarative
+          load.isDeclarative = true;
+          return loader.loaderObj.transpile(load)
+          .then(function(transpiled) {
+            // Hijack System.register to set declare function
+            var curSystem = __global.System;
+            var curRegister = curSystem.register;
+            curSystem.register = function(name, deps, declare) {
+              if (typeof name != 'string') {
+                declare = deps;
+                deps = name;
+              }
+              // store the registered declaration as load.declare
+              // store the deps as load.deps
+              load.declare = declare;
+              load.depsList = deps;
+            }            
+            __eval(transpiled, __global, load);
+            curSystem.register = curRegister;
+          });
+        }
+        else if (typeof instantiateResult == 'object') {
+          load.depsList = instantiateResult.deps || [];
+          load.execute = instantiateResult.execute;
+          load.isDeclarative = false;
+        }
+        else
+          throw TypeError('Invalid instantiate return value');
+      })
+      // 15.2.4.6 ProcessLoadDependencies
+      .then(function() {
+        load.dependencies = [];
+        var depsList = load.depsList;
+
+        var loadPromises = [];
+        for (var i = 0, l = depsList.length; i < l; i++) (function(request, index) {
+          loadPromises.push(
+            requestLoad(loader, request, load.name, load.address)
+
+            // 15.2.4.6.1 AddDependencyLoad (load is parentLoad)
+            .then(function(depLoad) {
+
+              // adjusted from spec to maintain dependency order
+              // this is due to the System.register internal implementation needs
+              load.dependencies[index] = {
+                key: request,
+                value: depLoad.name
+              };
+
+              if (depLoad.status != 'linked') {
+                var linkSets = load.linkSets.concat([]);
+                for (var i = 0, l = linkSets.length; i < l; i++)
+                  addLoadToLinkSet(linkSets[i], depLoad);
+              }
+
+              // console.log('AddDependencyLoad ' + depLoad.name + ' for ' + load.name);
+              // snapshot(loader);
+            })
+          );
+        })(depsList[i], i);
+
+        return Promise.all(loadPromises);
+      })
+
+      // 15.2.4.6.2 LoadSucceeded
+      .then(function() {
+        // console.log('LoadSucceeded ' + load.name);
+        // snapshot(loader);
+
+        console.assert(load.status == 'loading', 'is loading');
+
+        load.status = 'loaded';
+
+        var linkSets = load.linkSets.concat([]);
+        for (var i = 0, l = linkSets.length; i < l; i++)
+          updateLinkSetOnLoad(linkSets[i], load);
+      });
+    })
+    // 15.2.4.5.4 LoadFailed
+    ['catch'](function(exc) {
+      load.status = 'failed';
+      load.exception = exc;
+
+      var linkSets = load.linkSets.concat([]);
+      for (var i = 0, l = linkSets.length; i < l; i++) {
+        linkSetFailed(linkSets[i], load, exc);
+      }
+
+      console.assert(load.linkSets.length == 0, 'linkSets not removed');
+    });
+  }
+
+  // 15.2.4.7 PromiseOfStartLoadPartwayThrough absorbed into calling functions
+
+  // 15.2.4.7.1
+  function asyncStartLoadPartwayThrough(stepState) {
+    return function(resolve, reject) {
+      var loader = stepState.loader;
+      var name = stepState.moduleName;
+      var step = stepState.step;
+
+      if (loader.modules[name])
+        throw new TypeError('"' + name + '" already exists in the module table');
+
+      // adjusted to pick up existing loads
+      var existingLoad;
+      for (var i = 0, l = loader.loads.length; i < l; i++) {
+        if (loader.loads[i].name == name) {
+          existingLoad = loader.loads[i];
+
+          if(step == 'translate' && !existingLoad.source) {
+            existingLoad.address = stepState.moduleAddress;
+            proceedToTranslate(loader, existingLoad, Promise.resolve(stepState.moduleSource));
+          }
+
+          return existingLoad.linkSets[0].done.then(function() {
+            resolve(existingLoad);
+          });
+        }
+      }
+
+      var load = createLoad(name);
+
+      load.metadata = stepState.moduleMetadata;
+
+      var linkSet = createLinkSet(loader, load);
+
+      loader.loads.push(load);
+
+      resolve(linkSet.done);
+
+      if (step == 'locate')
+        proceedToLocate(loader, load);
+
+      else if (step == 'fetch')
+        proceedToFetch(loader, load, Promise.resolve(stepState.moduleAddress));
+
+      else {
+        console.assert(step == 'translate', 'translate step');
+        load.address = stepState.moduleAddress;
+        proceedToTranslate(loader, load, Promise.resolve(stepState.moduleSource));
+      }
+    }
+  }
+
+  // Declarative linking functions run through alternative implementation:
+  // 15.2.5.1.1 CreateModuleLinkageRecord not implemented
+  // 15.2.5.1.2 LookupExport not implemented
+  // 15.2.5.1.3 LookupModuleDependency not implemented
+
+  // 15.2.5.2.1
+  function createLinkSet(loader, startingLoad) {
+    var linkSet = {
+      loader: loader,
+      loads: [],
+      startingLoad: startingLoad, // added see spec bug https://bugs.ecmascript.org/show_bug.cgi?id=2995
+      loadingCount: 0
+    };
+    linkSet.done = new Promise(function(resolve, reject) {
+      linkSet.resolve = resolve;
+      linkSet.reject = reject;
+    });
+    addLoadToLinkSet(linkSet, startingLoad);
+    return linkSet;
+  }
+  // 15.2.5.2.2
+  function addLoadToLinkSet(linkSet, load) {
+    console.assert(load.status == 'loading' || load.status == 'loaded', 'loading or loaded on link set');
+
+    for (var i = 0, l = linkSet.loads.length; i < l; i++)
+      if (linkSet.loads[i] == load)
+        return;
+
+    linkSet.loads.push(load);
+    load.linkSets.push(linkSet);
+
+    // adjustment, see https://bugs.ecmascript.org/show_bug.cgi?id=2603
+    if (load.status != 'loaded') {
+      linkSet.loadingCount++;
+    }
+
+    var loader = linkSet.loader;
+
+    for (var i = 0, l = load.dependencies.length; i < l; i++) {
+      var name = load.dependencies[i].value;
+
+      if (loader.modules[name])
+        continue;
+
+      for (var j = 0, d = loader.loads.length; j < d; j++) {
+        if (loader.loads[j].name != name)
+          continue;
+
+        addLoadToLinkSet(linkSet, loader.loads[j]);
+        break;
+      }
+    }
+    // console.log('add to linkset ' + load.name);
+    // snapshot(linkSet.loader);
+  }
+
+  // linking errors can be generic or load-specific
+  // this is necessary for debugging info
+  function doLink(linkSet) {
+    var error = false;
+    try {
+      link(linkSet, function(load, exc) {
+        linkSetFailed(linkSet, load, exc);
+        error = true;
+      });
+    }
+    catch(e) {
+      linkSetFailed(linkSet, null, e);
+      error = true;
+    }
+    return error;
+  }
+
+  // 15.2.5.2.3
+  function updateLinkSetOnLoad(linkSet, load) {
+    // console.log('update linkset on load ' + load.name);
+    // snapshot(linkSet.loader);
+
+    console.assert(load.status == 'loaded' || load.status == 'linked', 'loaded or linked');
+
+    linkSet.loadingCount--;
+
+    if (linkSet.loadingCount > 0)
+      return;
+
+    // adjusted for spec bug https://bugs.ecmascript.org/show_bug.cgi?id=2995
+    var startingLoad = linkSet.startingLoad;
+
+    // non-executing link variation for loader tracing
+    // on the server. Not in spec.
+    /***/
+    if (linkSet.loader.loaderObj.execute === false) {
+      var loads = [].concat(linkSet.loads);
+      for (var i = 0, l = loads.length; i < l; i++) {
+        var load = loads[i];
+        load.module = !load.isDeclarative ? {
+          module: _newModule({})
+        } : {
+          name: load.name,
+          module: _newModule({}),
+          evaluated: true
+        };
+        load.status = 'linked';
+        finishLoad(linkSet.loader, load);
+      }
+      return linkSet.resolve(startingLoad);
+    }
+    /***/
+
+    var abrupt = doLink(linkSet);
+
+    if (abrupt)
+      return;
+
+    console.assert(linkSet.loads.length == 0, 'loads cleared');
+
+    linkSet.resolve(startingLoad);
+  }
+
+  // 15.2.5.2.4
+  function linkSetFailed(linkSet, load, exc) {
+    var loader = linkSet.loader;
+
+    if (linkSet.loads[0].name != load.name)
+      exc = addToError(exc, 'Error loading "' + load.name + '" from "' + linkSet.loads[0].name + '" at ' + (linkSet.loads[0].address || '<unknown>') + '\n');
+
+    exc = addToError(exc, 'Error loading "' + load.name + '" at ' + (load.address || '<unknown>') + '\n');
+
+    var loads = linkSet.loads.concat([]);
+    for (var i = 0, l = loads.length; i < l; i++) {
+      var load = loads[i];
+
+      // store all failed load records
+      loader.loaderObj.failed = loader.loaderObj.failed || [];
+      if (indexOf.call(loader.loaderObj.failed, load) == -1)
+        loader.loaderObj.failed.push(load);
+
+      var linkIndex = indexOf.call(load.linkSets, linkSet);
+      console.assert(linkIndex != -1, 'link not present');
+      load.linkSets.splice(linkIndex, 1);
+      if (load.linkSets.length == 0) {
+        var globalLoadsIndex = indexOf.call(linkSet.loader.loads, load);
+        if (globalLoadsIndex != -1)
+          linkSet.loader.loads.splice(globalLoadsIndex, 1);
+      }
+    }
+    linkSet.reject(exc);
+  }
+
+  // 15.2.5.2.5
+  function finishLoad(loader, load) {
+    // add to global trace if tracing
+    if (loader.loaderObj.trace) {
+      if (!loader.loaderObj.loads)
+        loader.loaderObj.loads = {};
+      var depMap = {};
+      load.dependencies.forEach(function(dep) {
+        depMap[dep.key] = dep.value;
+      });
+      loader.loaderObj.loads[load.name] = {
+        name: load.name,
+        deps: load.dependencies.map(function(dep){ return dep.key }),
+        depMap: depMap,
+        address: load.address,
+        metadata: load.metadata,
+        source: load.source,
+        kind: load.isDeclarative ? 'declarative' : 'dynamic'
+      };
+    }
+    // if not anonymous, add to the module table
+    if (load.name) {
+      console.assert(!loader.modules[load.name], 'load not in module table');
+      loader.modules[load.name] = load.module;
+    }
+    var loadIndex = indexOf.call(loader.loads, load);
+    if (loadIndex != -1)
+      loader.loads.splice(loadIndex, 1);
+    for (var i = 0, l = load.linkSets.length; i < l; i++) {
+      loadIndex = indexOf.call(load.linkSets[i].loads, load);
+      if (loadIndex != -1)
+        load.linkSets[i].loads.splice(loadIndex, 1);
+    }
+    load.linkSets.splice(0, load.linkSets.length);
+  }
+
+  // 15.2.5.3 Module Linking Groups
+
+  // 15.2.5.3.2 BuildLinkageGroups alternative implementation
+  // Adjustments (also see https://bugs.ecmascript.org/show_bug.cgi?id=2755)
+  // 1. groups is an already-interleaved array of group kinds
+  // 2. load.groupIndex is set when this function runs
+  // 3. load.groupIndex is the interleaved index ie 0 declarative, 1 dynamic, 2 declarative, ... (or starting with dynamic)
+  function buildLinkageGroups(load, loads, groups) {
+    groups[load.groupIndex] = groups[load.groupIndex] || [];
+
+    // if the load already has a group index and its in its group, its already been done
+    // this logic naturally handles cycles
+    if (indexOf.call(groups[load.groupIndex], load) != -1)
+      return;
+
+    // now add it to the group to indicate its been seen
+    groups[load.groupIndex].push(load);
+
+    for (var i = 0, l = loads.length; i < l; i++) {
+      var loadDep = loads[i];
+
+      // dependencies not found are already linked
+      for (var j = 0; j < load.dependencies.length; j++) {
+        if (loadDep.name == load.dependencies[j].value) {
+          // by definition all loads in linkset are loaded, not linked
+          console.assert(loadDep.status == 'loaded', 'Load in linkSet not loaded!');
+
+          // if it is a group transition, the index of the dependency has gone up
+          // otherwise it is the same as the parent
+          var loadDepGroupIndex = load.groupIndex + (loadDep.isDeclarative != load.isDeclarative);
+
+          // the group index of an entry is always the maximum
+          if (loadDep.groupIndex === undefined || loadDep.groupIndex < loadDepGroupIndex) {
+
+            // if already in a group, remove from the old group
+            if (loadDep.groupIndex !== undefined) {
+              groups[loadDep.groupIndex].splice(indexOf.call(groups[loadDep.groupIndex], loadDep), 1);
+
+              // if the old group is empty, then we have a mixed depndency cycle
+              if (groups[loadDep.groupIndex].length == 0)
+                throw new TypeError("Mixed dependency cycle detected");
+            }
+
+            loadDep.groupIndex = loadDepGroupIndex;
+          }
+
+          buildLinkageGroups(loadDep, loads, groups);
+        }
+      }
+    }
+  }
+
+  function doDynamicExecute(linkSet, load, linkError) {
+    try {
+      var module = load.execute();
+    }
+    catch(e) {
+      linkError(load, e);
+      return;
+    }
+    if (!module || !(module instanceof Module))
+      linkError(load, new TypeError('Execution must define a Module instance'));
+    else
+      return module;
+  }
+
+  // 15.2.5.4
+  function link(linkSet, linkError) {
+
+    var loader = linkSet.loader;
+
+    if (!linkSet.loads.length)
+      return;
+
+    // console.log('linking {' + logloads(linkSet.loads) + '}');
+    // snapshot(loader);
+
+    // 15.2.5.3.1 LinkageGroups alternative implementation
+
+    // build all the groups
+    // because the first load represents the top of the tree
+    // for a given linkset, we can work down from there
+    var groups = [];
+    var startingLoad = linkSet.loads[0];
+    startingLoad.groupIndex = 0;
+    buildLinkageGroups(startingLoad, linkSet.loads, groups);
+
+    // determine the kind of the bottom group
+    var curGroupDeclarative = startingLoad.isDeclarative == groups.length % 2;
+
+    // run through the groups from bottom to top
+    for (var i = groups.length - 1; i >= 0; i--) {
+      var group = groups[i];
+      for (var j = 0; j < group.length; j++) {
+        var load = group[j];
+
+        // 15.2.5.5 LinkDeclarativeModules adjusted
+        if (curGroupDeclarative) {
+          linkDeclarativeModule(load, linkSet.loads, loader);
+        }
+        // 15.2.5.6 LinkDynamicModules adjusted
+        else {
+          var module = doDynamicExecute(linkSet, load, linkError);
+          if (!module)
+            return;
+          load.module = {
+            name: load.name,
+            module: module
+          };
+          load.status = 'linked';
+        }
+        finishLoad(loader, load);
+      }
+
+      // alternative current kind for next loop
+      curGroupDeclarative = !curGroupDeclarative;
+    }
+  }
+
+
+  // custom module records for binding graph
+  // store linking module records in a separate table
+  function getOrCreateModuleRecord(name, loader) {
+    var moduleRecords = loader.moduleRecords;
+    return moduleRecords[name] || (moduleRecords[name] = {
+      name: name,
+      dependencies: [],
+      module: new Module(), // start from an empty module and extend
+      importers: []
+    });
+  }
+
+  // custom declarative linking function
+  function linkDeclarativeModule(load, loads, loader) {
+    if (load.module)
+      return;
+
+    var module = load.module = getOrCreateModuleRecord(load.name, loader);
+    var moduleObj = load.module.module;
+
+    var registryEntry = load.declare.call(__global, function(name, value) {
+      // NB This should be an Object.defineProperty, but that is very slow.
+      //    By disaling this module write-protection we gain performance.
+      //    It could be useful to allow an option to enable or disable this.
+      module.locked = true;
+      moduleObj[name] = value;
+
+      for (var i = 0, l = module.importers.length; i < l; i++) {
+        var importerModule = module.importers[i];
+        if (!importerModule.locked) {
+          var importerIndex = indexOf.call(importerModule.dependencies, module);
+          importerModule.setters[importerIndex](moduleObj);
+        }
+      }
+
+      module.locked = false;
+      return value;
+    });
+
+    // setup our setters and execution function
+    module.setters = registryEntry.setters;
+    module.execute = registryEntry.execute;
+
+    // now link all the module dependencies
+    // amending the depMap as we go
+    for (var i = 0, l = load.dependencies.length; i < l; i++) {
+      var depName = load.dependencies[i].value;
+      var depModule = loader.modules[depName];
+
+      // if dependency not already in the module registry
+      // then try and link it now
+      if (!depModule) {
+        // get the dependency load record
+        for (var j = 0; j < loads.length; j++) {
+          if (loads[j].name != depName)
+            continue;
+
+          // only link if already not already started linking (stops at circular / dynamic)
+          if (!loads[j].module) {
+            linkDeclarativeModule(loads[j], loads, loader);
+            depModule = loads[j].module;
+          }
+          // if circular, create the module record
+          else {
+            depModule = getOrCreateModuleRecord(depName, loader);
+          }
+        }
+      }
+
+      // only declarative modules have dynamic bindings
+      if (depModule.importers) {
+        module.dependencies.push(depModule);
+        depModule.importers.push(module);
+      }
+      else {
+        // track dynamic records as null module records as already linked
+        module.dependencies.push(null);
+      }
+
+      // run the setter for this dependency
+      if (module.setters[i])
+        module.setters[i](depModule.module);
+    }
+
+    load.status = 'linked';
+  }
+
+
+
+  // 15.2.5.5.1 LinkImports not implemented
+  // 15.2.5.7 ResolveExportEntries not implemented
+  // 15.2.5.8 ResolveExports not implemented
+  // 15.2.5.9 ResolveExport not implemented
+  // 15.2.5.10 ResolveImportEntries not implemented
+
+  // 15.2.6.1
+  function evaluateLoadedModule(loader, load) {
+    console.assert(load.status == 'linked', 'is linked ' + load.name);
+
+    doEnsureEvaluated(load.module, [], loader);
+    return load.module.module;
+  }
+
+  /*
+   * Module Object non-exotic for ES5:
+   *
+   * module.module        bound module object
+   * module.execute       execution function for module
+   * module.dependencies  list of module objects for dependencies
+   * See getOrCreateModuleRecord for all properties
+   *
+   */
+  function doExecute(module) {
+    try {
+      module.execute.call(__global);
+    }
+    catch(e) {
+      return e;
+    }
+  }
+
+  // propogate execution errors
+  // see https://bugs.ecmascript.org/show_bug.cgi?id=2993
+  function doEnsureEvaluated(module, seen, loader) {
+    var err = ensureEvaluated(module, seen, loader);
+    if (err)
+      throw err;
+  }
+  // 15.2.6.2 EnsureEvaluated adjusted
+  function ensureEvaluated(module, seen, loader) {
+    if (module.evaluated || !module.dependencies)
+      return;
+
+    seen.push(module);
+
+    var deps = module.dependencies;
+    var err;
+
+    for (var i = 0, l = deps.length; i < l; i++) {
+      var dep = deps[i];
+      // dynamic dependencies are empty in module.dependencies
+      // as they are already linked
+      if (!dep)
+        continue;
+      if (indexOf.call(seen, dep) == -1) {
+        err = ensureEvaluated(dep, seen, loader);
+        // stop on error, see https://bugs.ecmascript.org/show_bug.cgi?id=2996
+        if (err) {
+          err = addToError(err, 'Error evaluating ' + dep.name + '\n');
+          return err;
+        }
+      }
+    }
+
+    if (module.failed)
+      return new Error('Module failed execution.');
+
+    if (module.evaluated)
+      return;
+
+    module.evaluated = true;
+    err = doExecute(module);
+    if (err) {
+      module.failed = true;
+    }
+    else if (Object.preventExtensions) {
+      // spec variation
+      // we don't create a new module here because it was created and ammended
+      // we just disable further extensions instead
+      Object.preventExtensions(module.module);
+    }
+
+    module.execute = undefined;
+    return err;
+  }
+
+  function addToError(err, msg) {
+    if (err instanceof Error)
+      err.message = msg + err.message;
+    else
+      err = msg + err;
+    return err;
+  }
+
+  // 26.3 Loader
+
+  // 26.3.1.1
+  function Loader(options) {
+    if (typeof options != 'object')
+      throw new TypeError('Options must be an object');
+
+    if (options.normalize)
+      this.normalize = options.normalize;
+    if (options.locate)
+      this.locate = options.locate;
+    if (options.fetch)
+      this.fetch = options.fetch;
+    if (options.translate)
+      this.translate = options.translate;
+    if (options.instantiate)
+      this.instantiate = options.instantiate;
+
+    this._loader = {
+      loaderObj: this,
+      loads: [],
+      modules: {},
+      importPromises: {},
+      moduleRecords: {}
+    };
+
+    // 26.3.3.6
+    defineProperty(this, 'global', {
+      get: function() {
+        return __global;
+      }
+    });
+
+    // 26.3.3.13 realm not implemented
+  }
+
+  function Module() {}
+
+  // importPromises adds ability to import a module twice without error - https://bugs.ecmascript.org/show_bug.cgi?id=2601
+  function createImportPromise(loader, name, promise) {
+    var importPromises = loader._loader.importPromises;
+    return importPromises[name] = promise.then(function(m) {
+      importPromises[name] = undefined;
+      return m;
+    }, function(e) {
+      importPromises[name] = undefined;
+      throw e;
+    });
+  }
+
+  Loader.prototype = {
+    // 26.3.3.1
+    constructor: Loader,
+    // 26.3.3.2
+    define: function(name, source, options) {
+      // check if already defined
+      if (this._loader.importPromises[name])
+        throw new TypeError('Module is already loading.');
+      return createImportPromise(this, name, new Promise(asyncStartLoadPartwayThrough({
+        step: 'translate',
+        loader: this._loader,
+        moduleName: name,
+        moduleMetadata: options && options.metadata || {},
+        moduleSource: source,
+        moduleAddress: options && options.address
+      })));
+    },
+    // 26.3.3.3
+    'delete': function(name) {
+      var loader = this._loader;
+      delete loader.importPromises[name];
+      delete loader.moduleRecords[name];
+      return loader.modules[name] ? delete loader.modules[name] : false;
+    },
+    // 26.3.3.4 entries not implemented
+    // 26.3.3.5
+    get: function(key) {
+      if (!this._loader.modules[key])
+        return;
+      doEnsureEvaluated(this._loader.modules[key], [], this);
+      return this._loader.modules[key].module;
+    },
+    // 26.3.3.7
+    has: function(name) {
+      return !!this._loader.modules[name];
+    },
+    // 26.3.3.8
+    'import': function(name, options) {
+      // run normalize first
+      var loaderObj = this;
+
+      // added, see https://bugs.ecmascript.org/show_bug.cgi?id=2659
+      return Promise.resolve(loaderObj.normalize(name, options && options.name, options && options.address))
+      .then(function(name) {
+        var loader = loaderObj._loader;
+
+        if (loader.modules[name]) {
+          doEnsureEvaluated(loader.modules[name], [], loader._loader);
+          return loader.modules[name].module;
+        }
+
+        return loader.importPromises[name] || createImportPromise(loaderObj, name,
+          loadModule(loader, name, options || {})
+          .then(function(load) {
+            delete loader.importPromises[name];
+            return evaluateLoadedModule(loader, load);
+          }));
+      });
+    },
+    // 26.3.3.9 keys not implemented
+    // 26.3.3.10
+    load: function(name, options) {
+      if (this._loader.modules[name]) {
+        doEnsureEvaluated(this._loader.modules[name], [], this._loader);
+        return Promise.resolve(this._loader.modules[name].module);
+      }
+      return this._loader.importPromises[name] || createImportPromise(this, name, loadModule(this._loader, name, {}));
+    },
+    // 26.3.3.11
+    module: function(source, options) {
+      var load = createLoad();
+      load.address = options && options.address;
+      var linkSet = createLinkSet(this._loader, load);
+      var sourcePromise = Promise.resolve(source);
+      var loader = this._loader;
+      var p = linkSet.done.then(function() {
+        return evaluateLoadedModule(loader, load);
+      });
+      proceedToTranslate(loader, load, sourcePromise);
+      return p;
+    },
+    // 26.3.3.12
+    newModule: function (obj) {
+      if (typeof obj != 'object')
+        throw new TypeError('Expected object');
+
+      // we do this to be able to tell if a module is a module privately in ES5
+      // by doing m instanceof Module
+      var m = new Module();
+
+      for (var key in obj) {
+        (function (key) {
+          defineProperty(m, key, {
+            configurable: false,
+            enumerable: true,
+            get: function () {
+              return obj[key];
+            }
+          });
+        })(key);
+      }
+
+      if (Object.preventExtensions)
+        Object.preventExtensions(m);
+
+      return m;
+    },
+    // 26.3.3.14
+    set: function(name, module) {
+      if (!(module instanceof Module))
+        throw new TypeError('Loader.set(' + name + ', module) must be a module');
+      this._loader.modules[name] = {
+        module: module
+      };
+    },
+    // 26.3.3.15 values not implemented
+    // 26.3.3.16 @@iterator not implemented
+    // 26.3.3.17 @@toStringTag not implemented
+
+    // 26.3.3.18.1
+    normalize: function(name, referrerName, referrerAddress) {
+      return name;
+    },
+    // 26.3.3.18.2
+    locate: function(load) {
+      return load.name;
+    },
+    // 26.3.3.18.3
+    fetch: function(load) {
+      throw new TypeError('Fetch not implemented');
+    },
+    // 26.3.3.18.4
+    translate: function(load) {
+      return load.source;
+    },
+    // 26.3.3.18.5
+    instantiate: function(load) {
+    }
+  };
+
+  var _newModule = Loader.prototype.newModule;
+
+  if (typeof exports === 'object')
+    module.exports = Loader;
+
+  __global.Reflect = __global.Reflect || {};
+  __global.Reflect.Loader = __global.Reflect.Loader || Loader;
+  __global.Reflect.global = __global.Reflect.global || __global;
+  __global.LoaderPolyfill = Loader;
+
+})();
+
+/*
+ * Traceur and Babel transpile hook for Loader
+ */
+(function(Loader) {
+  var g = __global;
+
+  function getTranspilerModule(loader, globalName) {
+    return loader.newModule({ 'default': g[globalName], __useDefault: true });
+  }
+  var firstRun = true;
+
+  // use Traceur by default
+  Loader.prototype.transpiler = 'traceur';
+
+  Loader.prototype.transpile = function(load) {
+    var self = this;
+
+    // pick up Transpiler modules from existing globals on first run if set
+    if (firstRun) {
+      if (g.traceur && !self.has('traceur'))
+        self.set('traceur', getTranspilerModule(self, 'traceur'));
+      if (g.babel && !self.has('babel'))
+        self.set('babel', getTranspilerModule(self, 'babel'));
+      if (g.ts && !self.has('typescript'))
+        self.set('typescript', getTranspilerModule(self, 'ts'));
+
+      firstRun = false;
+    }
+    
+    return self['import'](self.transpiler).then(function(transpiler) {
+      if (transpiler.__useDefault)
+        transpiler = transpiler['default'];
+
+      var transpileFunction;
+      if (transpiler.Compiler) {
+        transpileFunction = traceurTranspile;
+      }
+      else if (transpiler.createLanguageService) {
+        transpileFunction = typescriptTranspile;
+      }
+      else {
+        transpileFunction = babelTranspile;
+      }
+      return address = 'var __moduleAddress = "' + load.address + '";' + transpileFunction.call(self, load, transpiler);
+    });
+  };
+
+  Loader.prototype.instantiate = function(load) {
+    // load transpiler as a global (avoiding System clobbering)
+    if (load.name === this.transpiler) {      
+      var self = this;
+      return {
+        deps: [],
+        execute: function() {
+          var curSystem = g.System;
+          var curLoader = g.Reflect.Loader;
+          __eval('(function(require,exports,module){' + load.source + '})();', g, load);
+          g.System = curSystem;
+          g.Reflect.Loader = curLoader;
+          return getTranspilerModule(self, load.name);
+        }
+      };
+    }
+  };
+
+  function traceurTranspile(load, traceur) {
+    var options = this.traceurOptions || {};
+    options.modules = 'instantiate';
+    options.script = false;
+    options.sourceMaps = 'inline';
+    options.filename = load.address;
+    options.inputSourceMap = load.metadata.sourceMap;
+    options.moduleName = false;
+
+    var compiler = new traceur.Compiler(options);
+    var source = doTraceurCompile(load.source, compiler, options.filename);
+
+    // add "!eval" to end of Traceur sourceURL
+    // I believe this does something?
+    source += '!eval';
+
+    return source;
+  }
+  function doTraceurCompile(source, compiler, filename) {
+    try {
+      return compiler.compile(source, filename);
+    }
+    catch(e) {
+      // traceur throws an error array
+      throw e[0];
+    }
+  }
+
+  function babelTranspile(load, babel) {
+    var options = this.babelOptions || {};
+    options.modules = 'system';
+    options.sourceMap = 'inline';
+    options.filename = load.address;
+    options.code = true;
+    options.ast = false;
+    
+    if (!options.blacklist)
+      options.blacklist = ['react'];
+
+    var source = babel.transform(load.source, options).code;
+
+    // add "!eval" to end of Babel sourceURL
+    // I believe this does something?
+    return source + '\n//# sourceURL=' + load.address + '!eval';
+  }
+  
+  function typescriptTranspile(load, ts) {
+    var options = { module: ts.ModuleKind.AMD };
+    var source = ts.transpile(load.source, options);
+    return "(function () {" + define.toString() + ";\n" + source + "\n })()";
+
+    function define(dependencyNames, module) {
+      return System.register(dependencyNames.slice(2), function ($__export) {
+        var exports = {};
+        var imports = [{}, exports];
+        var setters = [];
+        for (var i = 0; i < dependencyNames.length - 2; ++i) {
+          setters.push(
+            (function (i) { return function (value) { imports[i + 2] = value; } })(i)
+          );
+        }
+        return {
+          setters: setters,
+          execute: function () {
+            module.apply(undefined, imports);
+            for (var n in exports) {
+              $__export(n, exports[n]);
+            }
+          }
+        }
+      });
+    }
+  }
+})(__global.LoaderPolyfill);/*
+*********************************************************************************************
+
+  System Loader Implementation
+
+    - Implemented to https://github.com/jorendorff/js-loaders/blob/master/browser-loader.js
+
+    - <script type="module"> supported
+
+*********************************************************************************************
+*/
+
+var $__Object$getPrototypeOf = Object.getPrototypeOf;
+var $__Object$defineProperty = Object.defineProperty;
+var $__Object$create = Object.create;
+
+(function() {
+  var isWorker = typeof self !== 'undefined' && typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope;
+  var isBrowser = typeof window != 'undefined' && !isWorker;
+  var isWindows = typeof process != 'undefined' && !!process.platform.match(/^win/);
+  var Promise = __global.Promise || require('when/es6-shim/Promise');
+
+  // Helpers
+  // Absolute URL parsing, from https://gist.github.com/Yaffle/1088850
+  function parseURI(url) {
+    var m = String(url).replace(/^\s+|\s+$/g, '').match(/^([^:\/?#]+:)?(\/\/(?:[^:@\/?#]*(?::[^:@\/?#]*)?@)?(([^:\/?#]*)(?::(\d*))?))?([^?#]*)(\?[^#]*)?(#[\s\S]*)?/);
+    // authority = '//' + user + ':' + pass '@' + hostname + ':' port
+    return (m ? {
+      href     : m[0] || '',
+      protocol : m[1] || '',
+      authority: m[2] || '',
+      host     : m[3] || '',
+      hostname : m[4] || '',
+      port     : m[5] || '',
+      pathname : m[6] || '',
+      search   : m[7] || '',
+      hash     : m[8] || ''
+    } : null);
+  }
+
+  function removeDotSegments(input) {
+    var output = [];
+    input.replace(/^(\.\.?(\/|$))+/, '')
+      .replace(/\/(\.(\/|$))+/g, '/')
+      .replace(/\/\.\.$/, '/../')
+      .replace(/\/?[^\/]*/g, function (p) {
+        if (p === '/..')
+          output.pop();
+        else
+          output.push(p);
+    });
+    return output.join('').replace(/^\//, input.charAt(0) === '/' ? '/' : '');
+  }
+
+  function toAbsoluteURL(base, href) {
+
+    if (isWindows)
+      href = href.replace(/\\/g, '/');
+
+    href = parseURI(href || '');
+    base = parseURI(base || '');
+
+    return !href || !base ? null : (href.protocol || base.protocol) +
+      (href.protocol || href.authority ? href.authority : base.authority) +
+      removeDotSegments(href.protocol || href.authority || href.pathname.charAt(0) === '/' ? href.pathname : (href.pathname ? ((base.authority && !base.pathname ? '/' : '') + base.pathname.slice(0, base.pathname.lastIndexOf('/') + 1) + href.pathname) : base.pathname)) +
+      (href.protocol || href.authority || href.pathname ? href.search : (href.search || base.search)) +
+      href.hash;
+  }
+
+  var fetchTextFromURL;
+
+  if (typeof XMLHttpRequest != 'undefined') {
+    fetchTextFromURL = function(url, fulfill, reject) {
+      var xhr = new XMLHttpRequest();
+      var sameDomain = true;
+      var doTimeout = false;
+      if (!('withCredentials' in xhr)) {
+        // check if same domain
+        var domainCheck = /^(\w+:)?\/\/([^\/]+)/.exec(url);
+        if (domainCheck) {
+          sameDomain = domainCheck[2] === window.location.host;
+          if (domainCheck[1])
+            sameDomain &= domainCheck[1] === window.location.protocol;
+        }
+      }
+      if (!sameDomain && typeof XDomainRequest != 'undefined') {
+        xhr = new XDomainRequest();
+        xhr.onload = load;
+        xhr.onerror = error;
+        xhr.ontimeout = error;
+        xhr.onprogress = function() {};
+        xhr.timeout = 0;
+        doTimeout = true;
+      }
+      function load() {
+        fulfill(xhr.responseText);
+      }
+      function error() {
+        reject(xhr.statusText + ': ' + url || 'XHR error');
+      }
+
+      xhr.onreadystatechange = function () {
+        if (xhr.readyState === 4) {
+          if (xhr.status === 200 || (xhr.status == 0 && xhr.responseText)) {
+            load();
+          } else {
+            error();
+          }
+        }
+      };
+      xhr.open("GET", url, true);
+
+      if (doTimeout)
+        setTimeout(function() {
+          xhr.send();
+        }, 0);
+
+      xhr.send(null);
+    }
+  }
+  else if (typeof require != 'undefined') {
+    var fs;
+    fetchTextFromURL = function(url, fulfill, reject) {
+      if (url.substr(0, 5) != 'file:')
+        throw 'Only file URLs of the form file: allowed running in Node.';
+      fs = fs || require('fs');
+      url = url.substr(5);
+      if (isWindows)
+        url = url.replace(/\//g, '\\');
+      return fs.readFile(url, function(err, data) {
+        if (err)
+          return reject(err);
+        else
+          fulfill(data + '');
+      });
+    }
+  }
+  else {
+    throw new TypeError('No environment fetch API available.');
+  }
+
+  var SystemLoader = function($__super) {
+    function SystemLoader(options) {
+      $__super.call(this, options || {});
+
+      // Set default baseURL and paths
+      if (typeof location != 'undefined' && location.href) {
+        var href = __global.location.href.split('#')[0].split('?')[0];
+        this.baseURL = href.substring(0, href.lastIndexOf('/') + 1);
+      }
+      else if (typeof process != 'undefined' && process.cwd) {
+        this.baseURL = 'file:' + process.cwd() + '/';
+        if (isWindows)
+          this.baseURL = this.baseURL.replace(/\\/g, '/');
+      }
+      else {
+        throw new TypeError('No environment baseURL');
+      }
+      this.paths = { '*': '*.js' };
+    }
+
+    SystemLoader.__proto__ = ($__super !== null ? $__super : Function.prototype);
+    SystemLoader.prototype = $__Object$create(($__super !== null ? $__super.prototype : null));
+
+    $__Object$defineProperty(SystemLoader.prototype, "constructor", {
+      value: SystemLoader
+    });
+
+    $__Object$defineProperty(SystemLoader.prototype, "global", {
+      get: function() {
+        return isBrowser ? window : (isWorker ? self : __global);
+      },
+
+      enumerable: false
+    });
+
+    $__Object$defineProperty(SystemLoader.prototype, "strict", {
+      get: function() { return true; },
+      enumerable: false
+    });
+
+    $__Object$defineProperty(SystemLoader.prototype, "normalize", {
+      value: function(name, parentName, parentAddress) {
+        if (typeof name != 'string')
+          throw new TypeError('Module name must be a string');
+
+        var segments = name.split('/');
+
+        if (segments.length == 0)
+          throw new TypeError('No module name provided');
+
+        // current segment
+        var i = 0;
+        // is the module name relative
+        var rel = false;
+        // number of backtracking segments
+        var dotdots = 0;
+        if (segments[0] == '.') {
+          i++;
+          if (i == segments.length)
+            throw new TypeError('Illegal module name "' + name + '"');
+          rel = true;
+        }
+        else {
+          while (segments[i] == '..') {
+            i++;
+            if (i == segments.length)
+              throw new TypeError('Illegal module name "' + name + '"');
+          }
+          if (i)
+            rel = true;
+          dotdots = i;
+        }
+
+        for (var j = i; j < segments.length; j++) {
+          var segment = segments[j];
+          if (segment == '' || segment == '.' || segment == '..')
+            throw new TypeError('Illegal module name "' + name + '"');
+        }
+
+        if (!rel)
+          return name;
+
+        // build the full module name
+        var normalizedParts = [];
+        var parentParts = (parentName || '').split('/');
+        var normalizedLen = parentParts.length - 1 - dotdots;
+
+        normalizedParts = normalizedParts.concat(parentParts.splice(0, parentParts.length - 1 - dotdots));
+        normalizedParts = normalizedParts.concat(segments.splice(i, segments.length - i));
+
+        return normalizedParts.join('/');
+      },
+
+      enumerable: false,
+      writable: true
+    });
+
+    $__Object$defineProperty(SystemLoader.prototype, "locate", {
+      value: function(load) {
+        var name = load.name;
+
+        // NB no specification provided for System.paths, used ideas discussed in https://github.com/jorendorff/js-loaders/issues/25
+
+        // most specific (longest) match wins
+        var pathMatch = '', wildcard;
+
+        // check to see if we have a paths entry
+        for (var p in this.paths) {
+          var pathParts = p.split('*');
+          if (pathParts.length > 2)
+            throw new TypeError('Only one wildcard in a path is permitted');
+
+          // exact path match
+          if (pathParts.length == 1) {
+            if (name == p && p.length > pathMatch.length) {
+              pathMatch = p;
+              break;
+            }
+          }
+
+          // wildcard path match
+          else {
+            if (name.substr(0, pathParts[0].length) == pathParts[0] && name.substr(name.length - pathParts[1].length) == pathParts[1]) {
+              pathMatch = p;
+              wildcard = name.substr(pathParts[0].length, name.length - pathParts[1].length - pathParts[0].length);
+            }
+          }
+        }
+
+        var outPath = this.paths[pathMatch];
+        if (wildcard)
+          outPath = outPath.replace('*', wildcard);
+
+        // percent encode just '#' in module names
+        // according to https://github.com/jorendorff/js-loaders/blob/master/browser-loader.js#L238
+        // we should encode everything, but it breaks for servers that don't expect it 
+        // like in (https://github.com/systemjs/systemjs/issues/168)
+        if (isBrowser)
+          outPath = outPath.replace(/#/g, '%23');
+
+        return toAbsoluteURL(this.baseURL, outPath);
+      },
+
+      enumerable: false,
+      writable: true
+    });
+
+    $__Object$defineProperty(SystemLoader.prototype, "fetch", {
+      value: function(load) {
+        var self = this;
+        return new Promise(function(resolve, reject) {
+          fetchTextFromURL(toAbsoluteURL(self.baseURL, load.address), function(source) {
+            resolve(source);
+          }, reject);
+        });
+      },
+
+      enumerable: false,
+      writable: true
+    });
+
+    return SystemLoader;
+  }(__global.LoaderPolyfill);
+
+  var System = new SystemLoader();
+
+  // note we have to export before runing "init" below
+  if (typeof exports === 'object')
+    module.exports = System;
+
+  __global.System = System;
+
+  // <script type="module"> support
+  // allow a data-init function callback once loaded
+  if (isBrowser && typeof document.getElementsByTagName != 'undefined') {
+    var curScript = document.getElementsByTagName('script');
+    curScript = curScript[curScript.length - 1];
+
+    function completed() {
+      document.removeEventListener( "DOMContentLoaded", completed, false );
+      window.removeEventListener( "load", completed, false );
+      ready();
+    }
+
+    function ready() {
+      var scripts = document.getElementsByTagName('script');
+      for (var i = 0; i < scripts.length; i++) {
+        var script = scripts[i];
+        if (script.type == 'module') {
+          var source = script.innerHTML.substr(1);
+          // It is important to reference the global System, rather than the one
+          // in our closure. We want to ensure that downstream users/libraries
+          // can override System w/ custom behavior.
+          __global.System.module(source)['catch'](function(err) { setTimeout(function() { throw err; }); });
+        }
+      }
+    }
+
+    // DOM ready, taken from https://github.com/jquery/jquery/blob/master/src/core/ready.js#L63
+    if (document.readyState === 'complete') {
+      setTimeout(ready);
+    }
+    else if (document.addEventListener) {
+      document.addEventListener('DOMContentLoaded', completed, false);
+      window.addEventListener('load', completed, false);
+    }
+
+    // run the data-init function on the script tag
+    if (curScript.getAttribute('data-init'))
+      window[curScript.getAttribute('data-init')]();
+  }
+})();
+
+
+// Define our eval outside of the scope of any other reference defined in this
+// file to avoid adding those references to the evaluation scope.
+function __eval(__source, __global, __load) {
+  try {
+    eval('(function() { var __moduleName = "' + (__load.name || '').replace('"', '\"') + '"; ' + __source + ' \n }).call(__global);');
+  }
+  catch(e) {
+    if (e.name == 'SyntaxError' || e.name == 'TypeError')
+      e.message = 'Evaluating ' + (__load.name || load.address) + '\n\t' + e.message;
+    throw e;
+  }
+}
+
+})(typeof window != 'undefined' ? window : (typeof WorkerGlobalScope != 'undefined' ?
+                                           self : global));
