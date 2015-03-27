@@ -15352,10 +15352,7 @@ var ts;
         function checkTypeReference(node) {
             checkGrammarTypeArguments(node, node.typeArguments);
             var type = getTypeFromTypeReferenceNode(node);
-            if (type === unknownType && node.typeName.kind === 65 && compilerOptions.separateCompilation) {
-                getResolvedSymbol(node.typeName);
-            }
-            else if (type !== unknownType && node.typeArguments) {
+            if (type !== unknownType && node.typeArguments) {
                 var len = node.typeArguments.length;
                 for (var i = 0; i < len; i++) {
                     checkSourceElement(node.typeArguments[i]);
@@ -15675,10 +15672,11 @@ var ts;
         function checkTypeNodeAsExpression(node) {
             if (node && node.kind === 141) {
                 var type = getTypeFromTypeNode(node);
-                if (!type || type.flags & (1048703 | 132 | 258)) {
+                var checkUnknownType = type === unknownType && compilerOptions.separateCompilation;
+                if (!type || (type.flags & (1048703 | 132 | 258) && !checkUnknownType)) {
                     return;
                 }
-                if (type.symbol.valueDeclaration) {
+                if (checkUnknownType || type.symbol.valueDeclaration) {
                     checkExpressionOrQualifiedName(node.typeName);
                 }
             }
