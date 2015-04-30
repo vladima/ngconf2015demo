@@ -33,6 +33,7 @@
     <todo-app>Loading...</todo-app>
     <script>
         System.transpiler = 'typescript';
+        System.typescriptOptions = { emitDecoratorMetadata: true };
         System.paths = {
             '*':'*.js',
             'todo': 'todo.ts'
